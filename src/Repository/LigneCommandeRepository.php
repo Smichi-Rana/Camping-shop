@@ -3,12 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\LigneCommande;
+use App\Entity\Commande;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<LigneCommande>
- */
 class LigneCommandeRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +14,39 @@ class LigneCommandeRepository extends ServiceEntityRepository
         parent::__construct($registry, LigneCommande::class);
     }
 
-    //    /**
-    //     * @return LigneCommande[] Returns an array of LigneCommande objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('l')
-    //            ->andWhere('l.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('l.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Retourne toutes les lignes d'une commande
+     */
+    public function findByCommande(Commande $commande): array
+    {
+        return $this->createQueryBuilder('l')
+            ->andWhere('l.commande = :commande')
+            ->setParameter('commande', $commande)
+            ->orderBy('l.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 
-    //    public function findOneBySomeField($value): ?LigneCommande
-    //    {
-    //        return $this->createQueryBuilder('l')
-    //            ->andWhere('l.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Calcul total d'une ligne : quantite × prixUnitaire
+     */
+    public function calculTotalLigne(LigneCommande $ligne): float
+    {
+        return $ligne->getQuantite() * $ligne->getPrixUnitaire();
+    }
+
+    /**
+     * Calcule le total de toutes les lignes d'une commande
+     */
+    public function totalCommande(Commande $commande): float
+    {
+        $lignes = $this->findByCommande($commande);
+        $total = 0;
+
+        foreach ($lignes as $ligne) {
+            $total += $ligne->getQuantite() * $ligne->getPrixUnitaire();
+        }
+
+        return $total;
+    }
 }

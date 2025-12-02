@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lignes de commande{% endblock %}
+
+{% block body %}
+    <h1>Lignes de commande</h1>
+    <ul>
+        {% for ligne in lignes %}
+            <li>{{ ligne.product.titre }} - Quantité: {{ ligne.quantite }} - Prix: {{ ligne.prixUnitaire }}</li>
+        {% else %}
+            <li>Aucune ligne trouvée.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

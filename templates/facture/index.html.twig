@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Factures{% endblock %}
+
+{% block body %}
+    <h1>Factures</h1>
+    <ul>
+        {% for facture in factures %}
+            <li>
+                ID: {{ facture.id }} | Montant: {{ facture.montant }} | Date: {{ facture.dateFacture|date('Y-m-d H:i') }}
+                <a href="{{ path('facture_show', {'id': facture.id}) }}">Voir</a>
+            </li>
+        {% else %}
+            <li>Aucune facture trouvée.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

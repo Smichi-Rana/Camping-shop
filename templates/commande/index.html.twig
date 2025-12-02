@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des commandes{% endblock %}
+
+{% block body %}
+    <h1>Liste des commandes</h1>
+    <a href="{{ path('commande_new') }}">Nouvelle commande</a>
+
+    <ul>
+        {% for commande in commandes %}
+            <li>
+                ID: {{ commande.id }} | Status: {{ commande.status }} | Montant: {{ commande.montantTotal }}
+                <a href="{{ path('commande_show', {'id': commande.id}) }}">Voir</a>
+                <a href="{{ path('commande_edit', {'id': commande.id}) }}">Modifier</a>
+            </li>
+        {% else %}
+            <li>Aucune commande trouvée.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

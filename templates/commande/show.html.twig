@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande #{{ commande.id }}{% endblock %}
+
+{% block body %}
+    <h1>Commande #{{ commande.id }}</h1>
+    <p>Status: {{ commande.status }}</p>
+    <p>Montant total: {{ montantTotal }}</p>
+
+    <h2>Lignes de commande</h2>
+    <ul>
+        {% for ligne in commande.ligneCommandes %}
+            <li>{{ ligne.product.titre }} - Quantité: {{ ligne.quantite }} - Prix unitaire: {{ ligne.prixUnitaire }}</li>
+        {% else %}
+            <li>Aucune ligne pour cette commande.</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Ajouter une ligne</h3>
+    {{ form_start(ligne_form) }}
+    {{ form_widget(ligne_form) }}
+    <button>Ajouter</button>
+    {{ form_end(ligne_form) }}
+
+    <a href="{{ path('commande_index') }}">Retour à la liste</a>
+{% endblock %}

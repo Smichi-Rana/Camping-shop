@@ -19,62 +19,25 @@ class LigneCommande
     #[ORM\Column]
     private ?float $prixUnitaire = null;
 
+    // La commande à laquelle cette ligne appartient
     #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
-    private ?commande $commande = null;
+    private ?Commande $commande = null;
 
+    // Le produit associé à cette ligne
     #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
-    private ?product $product = null;
+    private ?Product $product = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    // -------- Getters & Setters --------
+    public function getId(): ?int { return $this->id; }
+    public function getQuantite(): ?int { return $this->quantite; }
+    public function setQuantite(int $quantite): static { $this->quantite = $quantite; return $this; }
 
-    public function getQuantite(): ?int
-    {
-        return $this->quantite;
-    }
+    public function getPrixUnitaire(): ?float { return $this->prixUnitaire; }
+    public function setPrixUnitaire(float $prixUnitaire): static { $this->prixUnitaire = $prixUnitaire; return $this; }
 
-    public function setQuantite(int $quantite): static
-    {
-        $this->quantite = $quantite;
+    public function getCommande(): ?Commande { return $this->commande; }
+    public function setCommande(?Commande $commande): static { $this->commande = $commande; return $this; }
 
-        return $this;
-    }
-
-    public function getPrixUnitaire(): ?float
-    {
-        return $this->prixUnitaire;
-    }
-
-    public function setPrixUnitaire(float $prixUnitaire): static
-    {
-        $this->prixUnitaire = $prixUnitaire;
-
-        return $this;
-    }
-
-    public function getCommande(): ?commande
-    {
-        return $this->commande;
-    }
-
-    public function setCommande(?commande $commande): static
-    {
-        $this->commande = $commande;
-
-        return $this;
-    }
-
-    public function getProduct(): ?product
-    {
-        return $this->product;
-    }
-
-    public function setProduct(?product $product): static
-    {
-        $this->product = $product;
-
-        return $this;
-    }
+    public function getProduct(): ?Product { return $this->product; }
+    public function setProduct(?Product $product): static { $this->product = $product; return $this; }
 }

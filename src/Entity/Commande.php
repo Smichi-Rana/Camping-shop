@@ -15,146 +15,82 @@ class Commande
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    // Date à laquelle la commande a été passée
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $dateCommande = null;
 
+    // Statut de la commande ("En cours", "Payée", "Annulée", etc.)
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
+    // Total de la commande (calculé depuis les lignes de commande)
     #[ORM\Column]
     private ?float $montantTotal = null;
 
+    // L'utilisateur qui a passé la commande
     #[ORM\ManyToOne(inversedBy: 'commandes')]
-    private ?user $user = null;
+    private ?User $user = null;
 
     /**
      * @var Collection<int, LigneCommande>
+     * Lignes de commande associées
      */
-    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'commande')]
+    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'commande', cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $ligneCommandes;
 
     /**
-     * @var Collection<int, Reclamation>
+     * Relation OneToOne avec Facture
      */
-    #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'commande')]
-    private Collection $reclamations;
+    #[ORM\OneToOne(mappedBy: 'commande', cascade: ['persist', 'remove'])]
+    private ?Facture $facture = null;
 
     public function __construct()
     {
+        $this->dateCommande = new \DateTimeImmutable();
         $this->ligneCommandes = new ArrayCollection();
-        $this->reclamations = new ArrayCollection();
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    // -------- Getters & Setters --------
+    public function getId(): ?int { return $this->id; }
+    public function getDateCommande(): ?\DateTimeImmutable { return $this->dateCommande; }
+    public function setDateCommande(\DateTimeImmutable $dateCommande): static { $this->dateCommande = $dateCommande; return $this; }
 
-    public function getDateCommande(): ?\DateTimeImmutable
-    {
-        return $this->dateCommande;
-    }
+    public function getStatus(): ?string { return $this->status; }
+    public function setStatus(string $status): static { $this->status = $status; return $this; }
 
-    public function setDateCommande(\DateTimeImmutable $dateCommande): static
-    {
-        $this->dateCommande = $dateCommande;
+    public function getMontantTotal(): ?float { return $this->montantTotal; }
+    public function setMontantTotal(float $montantTotal): static { $this->montantTotal = $montantTotal; return $this; }
 
-        return $this;
-    }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): static
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    public function getMontantTotal(): ?float
-    {
-        return $this->montantTotal;
-    }
-
-    public function setMontantTotal(float $montantTotal): static
-    {
-        $this->montantTotal = $montantTotal;
-
-        return $this;
-    }
-
-    public function getUser(): ?user
-    {
-        return $this->user;
-    }
-
-    public function setUser(?user $user): static
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, LigneCommande>
-     */
-    public function getLigneCommandes(): Collection
-    {
-        return $this->ligneCommandes;
-    }
-
+    public function getLigneCommandes(): Collection { return $this->ligneCommandes; }
     public function addLigneCommande(LigneCommande $ligneCommande): static
     {
         if (!$this->ligneCommandes->contains($ligneCommande)) {
             $this->ligneCommandes->add($ligneCommande);
             $ligneCommande->setCommande($this);
         }
-
         return $this;
     }
-
     public function removeLigneCommande(LigneCommande $ligneCommande): static
     {
         if ($this->ligneCommandes->removeElement($ligneCommande)) {
-            // set the owning side to null (unless already changed)
             if ($ligneCommande->getCommande() === $this) {
                 $ligneCommande->setCommande(null);
             }
         }
-
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reclamation>
-     */
-    public function getReclamations(): Collection
+    public function getFacture(): ?Facture { return $this->facture; }
+    public function setFacture(Facture $facture): static
     {
-        return $this->reclamations;
-    }
-
-    public function addReclamation(Reclamation $reclamation): static
-    {
-        if (!$this->reclamations->contains($reclamation)) {
-            $this->reclamations->add($reclamation);
-            $reclamation->setCommande($this);
+        // Assure la cohérence bidirectionnelle
+        if ($facture->getCommande() !== $this) {
+            $facture->setCommande($this);
         }
-
-        return $this;
-    }
-
-    public function removeReclamation(Reclamation $reclamation): static
-    {
-        if ($this->reclamations->removeElement($reclamation)) {
-            // set the owning side to null (unless already changed)
-            if ($reclamation->getCommande() === $this) {
-                $reclamation->setCommande(null);
-            }
-        }
-
+        $this->facture = $facture;
         return $this;
     }
 }

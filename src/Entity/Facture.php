@@ -13,68 +13,46 @@ class Facture
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column]
+    // Date de la facture
+    #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $dateFacture = null;
 
+    // Montant total (calculé depuis la commande)
     #[ORM\Column]
     private ?float $montant = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?commande $commande = null;
+    // Relation OneToOne vers la commande
+    #[ORM\OneToOne(inversedBy: 'facture', cascade: ['persist', 'remove'])]
+    private ?Commande $commande = null;
 
+    // L'utilisateur qui reçoit la facture
     #[ORM\ManyToOne(inversedBy: 'factures')]
-    private ?user $user = null;
+    private ?User $user = null;
 
-    public function getId(): ?int
+    public function __construct()
     {
-        return $this->id;
+        $this->dateFacture = new \DateTimeImmutable();
     }
 
-    public function getDateFacture(): ?\DateTimeImmutable
+    // -------- Getters & Setters --------
+    public function getId(): ?int { return $this->id; }
+    public function getDateFacture(): ?\DateTimeImmutable { return $this->dateFacture; }
+    public function setDateFacture(\DateTimeImmutable $dateFacture): static { $this->dateFacture = $dateFacture; return $this; }
+
+    public function getMontant(): ?float { return $this->montant; }
+    public function setMontant(float $montant): static { $this->montant = $montant; return $this; }
+
+    public function getCommande(): ?Commande { return $this->commande; }
+    public function setCommande(?Commande $commande): static
     {
-        return $this->dateFacture;
-    }
-
-    public function setDateFacture(\DateTimeImmutable $dateFacture): static
-    {
-        $this->dateFacture = $dateFacture;
-
-        return $this;
-    }
-
-    public function getMontant(): ?float
-    {
-        return $this->montant;
-    }
-
-    public function setMontant(float $montant): static
-    {
-        $this->montant = $montant;
-
-        return $this;
-    }
-
-    public function getCommande(): ?commande
-    {
-        return $this->commande;
-    }
-
-    public function setCommande(?commande $commande): static
-    {
+        // Assure la cohérence bidirectionnelle
+        if ($commande->getFacture() !== $this) {
+            $commande->setFacture($this);
+        }
         $this->commande = $commande;
-
         return $this;
     }
 
-    public function getUser(): ?user
-    {
-        return $this->user;
-    }
-
-    public function setUser(?user $user): static
-    {
-        $this->user = $user;
-
-        return $this;
-    }
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): static { $this->user = $user; return $this; }
 }
