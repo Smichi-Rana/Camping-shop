@@ -2,10 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ProductRepository;
+
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -16,34 +17,34 @@ class Product
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Name = null;
+    private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Description = null;
+    private ?string $description = null;
 
     #[ORM\Column]
-    private ?float $Price = null;
+    private ?float $price = null;
 
     #[ORM\Column]
-    private ?int $Stock = null;
+    private ?int $stock = null;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Category $Category = null;
+    private ?Category $category = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $Reférence = null;
+    private ?string $reference = null;
 
     /**
      * @var Collection<int, LigneCommande>
      */
-    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'product')]
+    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'Product')]
     private Collection $ligneCommandes;
 
     /**
      * @var Collection<int, Reclamation>
      */
-    #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'product')]
+    #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'Product')]
     private Collection $reclamations;
 
     public function __construct()
@@ -59,72 +60,72 @@ class Product
 
     public function getName(): ?string
     {
-        return $this->Name;
+        return $this->name;
     }
 
-    public function setName(string $Name): static
+    public function setName(string $name): static
     {
-        $this->Name = $Name;
+        $this->name = $name;
 
         return $this;
     }
 
     public function getDescription(): ?string
     {
-        return $this->Description;
+        return $this->description;
     }
 
-    public function setDescription(string $Description): static
+    public function setDescription(string $description): static
     {
-        $this->Description = $Description;
+        $this->description = $description;
 
         return $this;
     }
 
     public function getPrice(): ?float
     {
-        return $this->Price;
+        return $this->price;
     }
 
-    public function setPrice(float $Price): static
+    public function setPrice(float $price): static
     {
-        $this->Price = $Price;
+        $this->price = $price;
 
         return $this;
     }
 
     public function getStock(): ?int
     {
-        return $this->Stock;
+        return $this->stock;
     }
 
-    public function setStock(int $Stock): static
+    public function setStock(int $stock): static
     {
-        $this->Stock = $Stock;
+        $this->stock = $stock;
 
         return $this;
     }
 
     public function getCategory(): ?Category
     {
-        return $this->Category;
+        return $this->category;
     }
 
-    public function setCategory(?Category $Category): static
+    public function setCategory(?Category $category): static
     {
-        $this->Category = $Category;
+        $this->category = $category;
 
         return $this;
     }
 
-    public function getReférence(): ?string
+    public function getReference(): ?string
     {
-        return $this->Reférence;
+        return $this->reference;
     }
 
-    public function setReférence(string $Reférence): static
+    public function setReference(string $reference): static
     {
-        $this->Reférence = $Reférence;
+        $this->reference = $reference;
 
         return $this;
     }
@@ -185,6 +186,8 @@ class Product
                 $reclamation->setProduct(null);
             }
         }
+
+
 
         return $this;
     }

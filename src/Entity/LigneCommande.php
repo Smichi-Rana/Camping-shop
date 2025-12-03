@@ -21,11 +21,11 @@ class LigneCommande
 
     #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Commande $Commande = null;
+    private ?Commande $commande = null;
 
     #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?product $product = null;
+    private ?Product $product = null;
 
     public function getId(): ?int
     {
@@ -58,22 +58,22 @@ class LigneCommande
 
     public function getCommande(): ?Commande
     {
-        return $this->Commande;
+        return $this->commande;
     }
 
-    public function setCommande(?Commande $Commande): static
+    public function setCommande(?Commande $commande): static
     {
-        $this->Commande = $Commande;
+        $this->commande = $commande;
 
         return $this;
     }
 
-    public function getProduct(): ?product
+    public function getProduct(): ?Product
     {
         return $this->product;
     }
 
-    public function setProduct(?product $product): static
+    public function setProduct(?Product $product): static
     {
         $this->product = $product;
 
