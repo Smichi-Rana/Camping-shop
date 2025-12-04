@@ -3,17 +3,30 @@
 {% block title %}Register{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+    <div class="container security-form">
+        <div class="login-form">
+            <h1>Register</h1>
 
-    {{ form_errors(registrationForm) }}
+            {{ form_errors(registrationForm) }}
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+            {{ form_start(registrationForm) }}
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+            {{ form_widget(registrationForm.email,{'attr':{'class':'form form-control','placeholder':"Email"}}) }}
+            <br>
+            {{ form_widget(registrationForm.first_name,{'attr':{'class':'form form-control','placeholder':"your Name"}})}}
+            <br>
+            {{ form_widget(registrationForm.last_name,{'attr':{'class':'form form-control','placeholder':"Last_name"}})}}
+            <br>
+            {{ form_widget(registrationForm.adresse,{'attr':{'class':'form form-control','placeholder':"Adresse"}})}}
+            <br>
+            {{ form_widget(registrationForm.code_postal,{'attr':{'class':'form form-control','placeholder':"code"}})}}
+            <br>
+            {{ form_widget(registrationForm.phone,{'attr':{'class':'form form-control','placeholder':"Phone"}})}}
+            <br>
+            {{ form_widget(registrationForm.plainPassword, {'attr':{'class':'form form-control','placeholder':"your passw@rd"}})}}
+            {{ form_row(registrationForm.agreeTerms) }}
+            <button type="submit " class="btn-block btn-primary">Register</button>
+            {{ form_end(registrationForm) }}
+        </div>
+    </div>
 {% endblock %}
