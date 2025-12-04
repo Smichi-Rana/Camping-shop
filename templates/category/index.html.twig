@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des catégories{% endblock %}
+
+{% block body %}
+    <h1>Liste des Catégories</h1>
+
+    {# Affichage des messages flash #}
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    {# Formulaire pour ajouter une nouvelle catégorie #}
+    <h2>Ajouter une nouvelle catégorie</h2>
+    {{ form_start(form) }}
+    {{ form_row(form.name) }}
+    {{ form_row(form.description) }}
+    <button class="btn btn-primary">Ajouter</button>
+    {{ form_end(form) }}
+
+    {# Tableau des catégories existantes #}
+    <h2>Catégories existantes</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Description</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if categories is empty %}
+            <tr>
+                <td colspan="4">Aucune catégorie trouvée.</td>
+            </tr>
+        {% else %}
+            {% for category in categories %}
+                <tr>
+                    <td>{{ category.id }}</td>
+                    <td>{{ category.name }}</td>
+                    <td>{{ category.description }}</td>
+                    <td>
+                        <a href="{{ path('category_edit', {'id': category.id}) }}" class="btn btn-warning">Modifier</a>
+                        <a href="{{ path('category_delete', {'id': category.id}) }}"
+                           onclick="return confirm('Supprimer cette catégorie ?');">Supprimer</a>
+
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+        </tbody>
+    </table>
+{% endblock %}
