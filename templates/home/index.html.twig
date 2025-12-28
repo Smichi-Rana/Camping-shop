@@ -1,20 +1,40 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Accueil{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <div class="container mt-4">
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+        <div class="jumbotron bg-light p-5 rounded shadow-sm">
+            <h1 class="display-4">Bienvenue sur CampingShop ! 🏕️</h1>
+            <p class="lead">Votre site e-commerce pour tout le matériel de camping.</p>
+            <hr class="my-4">
+            <p>Ajoutez vos produits préférés au panier, consultez les avis et envoyez vos réclamations facilement.</p>
+            <a class="btn btn-primary btn-lg" href="{{ path('cart_index') }}" role="button">
+                Voir mon panier <i class="bi bi-cart"></i>
+            </a>
+        </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>D:/OneDrive/Desktop/my_project/camping-shop/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>D:/OneDrive/Desktop/my_project/camping-shop/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+        <div class="row mt-5">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">À propos</h5>
+                        <p class="card-text">Découvrez qui nous sommes et notre mission.</p>
+                        <a href="{{ path('about') }}" class="btn btn-outline-primary">En savoir plus</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Réclamations</h5>
+                        <p class="card-text">Besoin d’aide ? Envoyez-nous une réclamation.</p>
+                        <a href="{{ path('reclamation_new') }}" class="btn btn-outline-primary">Envoyer une réclamation</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
 {% endblock %}

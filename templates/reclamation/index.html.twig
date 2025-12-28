@@ -1,0 +1,25 @@
+<h1>Mes réclamations</h1>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Message</th>
+        <th>Date</th>
+        <th>Statut</th>
+    </tr>
+
+    {% for reclamation in reclamations %}
+        <tr>
+            <td>{{ reclamation.id }}</td>
+            <td>{{ reclamation.message }}</td>
+            <td>{{ reclamation.date|date('Y-m-d') }}</td>
+            <td>{{ reclamation.statut }}</td>
+        </tr>
+    {% else %}
+        <tr>
+            <td colspan="4">Aucune réclamation pour le moment.</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<a href="{{ path('app_reclamation_new') }}">Nouvelle réclamation</a>

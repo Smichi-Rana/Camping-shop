@@ -9,6 +9,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 
 #[ORM\Entity(repositoryClass: ReclamationRepository::class)]
@@ -20,24 +21,32 @@ class Reclamation
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "Le message est obligatoire.")]
     private ?string $message = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $date = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $statut = null;
+    private ?string $statut = "En attente";
 
     #[ORM\ManyToOne(inversedBy: 'reclamations')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
     #[ORM\ManyToOne(inversedBy: 'reclamations')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Commande $commande = null;
 
     #[ORM\ManyToOne(inversedBy: 'reclamations')]
     private ?Product $product = null;
+
+    public function __construct()
+    {
+        $this->date = new \DateTimeImmutable();
+        $this->statut = 'En attente';
+    }
+
 
     public function getId(): ?int
     {

@@ -1,0 +1,16 @@
+<h2>Mon panier</h2>
+
+{% if cart is empty %}
+    <p>Panier vide</p>
+{% else %}
+    {% for item in cart %}
+        <p>
+            {{ item.product.nom }} |
+            {{ item.quantity }} |
+            {{ item.total }} DT
+            <a href="{{ path('cart_remove', {id: item.product.id}) }}">Supprimer</a>
+        </p>
+    {% endfor %}
+
+    <h3>Total : {{ total }} DT</h3>
+{% endif %}

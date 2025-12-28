@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block body %}
+    <h1 class="mb-4">Dashboard Admin</h1>
+
+    <div class="row">
+
+        <!-- Paiements -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Paiements</h5>
+                    <p class="card-text">Gérer et consulter tous les paiements des clients.</p>
+                    <a href="{{ path('paiement_index') }}" class="btn btn-primary">Voir Paiements</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Avis clients -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Avis clients</h5>
+                    <p class="card-text">Consulter tous les avis laissés par les clients.</p>
+                    <a href="{{ path('avis_index') }}" class="btn btn-primary">Voir Avis</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Réclamations -->
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Réclamations</h5>
+                    <p class="card-text">Traiter toutes les réclamations reçues.</p>
+                    <a href="{{ path('reclamation_index') }}" class="btn btn-primary">Voir Réclamations</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Optionnel: résumé du panier -->
+    <div class="mt-4">
+        <h3>Panier rapide</h3>
+        {% if app.request.cookies.get('cart') is not empty %}
+            {% set cart = app.request.cookies.get('cart')|json_decode %}
+            <p>Nombre de produits dans le panier: {{ cart|length }}</p>
+            <a href="{{ path('cart_index') }}" class="btn btn-secondary">Voir le panier</a>
+        {% else %}
+            <p>Le panier est vide.</p>
+        {% endif %}
+    </div>
+
+{% endblock %}

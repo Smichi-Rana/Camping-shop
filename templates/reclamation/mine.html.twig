@@ -1,0 +1,14 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+    <h1>Mes réclamations</h1>
+    <ul>
+        {% for r in reclamations %}
+            <li>
+                <a href="{{ path('app_reclamation_show', {id: r.id}) }}">#{{ r.id }}</a> - {{ r.statut }} - {{ r.date|date('Y-m-d H:i') }}
+            </li>
+        {% else %}
+            <li>Aucune réclamation</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ path('app_reclamation_new') }}">Créer une réclamation</a>
+{% endblock %}
