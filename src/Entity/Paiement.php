@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Entity;
-
+use App\Entity\User;
 use App\Repository\PaiementRepository;
 use Doctrine\ORM\Mapping as ORM;
+use phpDocumentor\Reflection\Types\float_;
 
 #[ORM\Entity(repositoryClass: PaiementRepository::class)]
 class Paiement
@@ -12,18 +13,22 @@ class Paiement
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
+    #[ORM\ManyToOne(inversedBy: 'paiements')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $user = null;
     #[ORM\Column(length: 255)]
     private ?string $methode = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'float')]
     private ?float $montant = null;
 
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTime $datePaiement = null;
+
+
 
     public function getId(): ?int
     {
@@ -74,6 +79,18 @@ class Paiement
     public function setDatePaiement(\DateTime $datePaiement): static
     {
         $this->datePaiement = $datePaiement;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->User;
+    }
+
+    public function setUser(?User $User): static
+    {
+        $this->User = $User;
 
         return $this;
     }

@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\SecurityBundle\Security;
 
 #[Route('/paiement')]
-class PaimentController extends AbstractController
+class PaiementController extends AbstractController
 {
     // 🟢 Formulaire et sauvegarde du paiement
     #[Route('/new', name: 'paiement_new')]

@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Paiements{% endblock %}
+
+{% block body %}
+    <h1>Liste des Paiements</h1>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Utilisateur</th>
+            <th>Méthode</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for paiement in paiements %}
+            <tr>
+                <td>{{ paiement.id }}</td>
+                <td>{{ paiement.user.email }}</td>
+                <td>{{ paiement.methode }}</td>
+                <td>{{ paiement.montant }}</td>
+                <td>{{ paiement.statut }}</td>
+                <td>{{ paiement.datePaiement|date('d/m/Y H:i') }}</td>
+            </tr>
+        {% else %}
+            <tr><td colspan="6">Aucun paiement trouvé.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

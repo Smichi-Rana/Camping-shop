@@ -3,14 +3,30 @@
 {% if cart is empty %}
     <p>Panier vide</p>
 {% else %}
-    {% for item in cart %}
-        <p>
-            {{ item.product.nom }} |
-            {{ item.quantity }} |
-            {{ item.total }} DT
-            <a href="{{ path('cart_remove', {id: item.product.id}) }}">Supprimer</a>
-        </p>
-    {% endfor %}
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+        <tr>
+            <th>Produit</th>
+            <th>Quantité</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in cart %}
+            <tr>
+                <td>{{ item.product.nom }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.total }} DT</td>
+                <td>
+                    <a href="{{ path('cart_remove', {id: item.product.id}) }}">Supprimer</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
 
     <h3>Total : {{ total }} DT</h3>
+
+    <a href="{{ path('cart_clear') }}" class="btn btn-warning">Vider le panier</a>
 {% endif %}

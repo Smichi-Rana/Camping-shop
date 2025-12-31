@@ -1,14 +1,31 @@
 {% extends 'base.html.twig' %}
+
+{% block title %}Mes Réclamations{% endblock %}
+
 {% block body %}
-    <h1>Mes réclamations</h1>
-    <ul>
-        {% for r in reclamations %}
-            <li>
-                <a href="{{ path('app_reclamation_show', {id: r.id}) }}">#{{ r.id }}</a> - {{ r.statut }} - {{ r.date|date('Y-m-d H:i') }}
-            </li>
-        {% else %}
-            <li>Aucune réclamation</li>
-        {% endfor %}
-    </ul>
-    <a href="{{ path('app_reclamation_new') }}">Créer une réclamation</a>
+    <h2>Mes Réclamations</h2>
+
+    {% for rec in reclamations %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <span>{{ rec.sujet }}</span>
+                <span class="badge
+            {% if rec.statut == 'pending' %} bg-warning
+            {% elseif rec.statut == 'resolved' %} bg-success
+            {% else %} bg-secondary {% endif %}">
+            {{ rec.statut|capitalize }}
+        </span>
+            </div>
+            <div class="card-body">
+                <p>{{ rec.message }}</p>
+                <small>Envoyé le {{ rec.createdAt|date('d/m/Y H:i') }}</small>
+                <div class="mt-2">
+                    <a href="{{ path('reclamation_edit', {id: rec.id}) }}" class="btn btn-sm btn-primary">Modifier</a>
+                    <a href="{{ path('reclamation_delete', {id: rec.id}) }}" class="btn btn-sm btn-danger">Supprimer</a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p>Aucune réclamation trouvée.</p>
+    {% endfor %}
 {% endblock %}

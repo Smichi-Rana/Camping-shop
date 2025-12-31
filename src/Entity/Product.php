@@ -28,7 +28,7 @@ class Product
     #[ORM\Column]
     private ?int $stock = null;
 
-    #[ORM\ManyToOne(inversedBy: 'products')]
+    #[ORM\ManyToOne(targetEntity: Category::class, inversedBy: 'products')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Category $category = null;
 
@@ -38,13 +38,13 @@ class Product
     /**
      * @var Collection<int, LigneCommande>
      */
-    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'Product')]
+    #[ORM\OneToMany(targetEntity: LigneCommande::class, mappedBy: 'product')]
     private Collection $ligneCommandes;
 
     /**
      * @var Collection<int, Reclamation>
      */
-    #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'Product')]
+    #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'product')]
     private Collection $reclamations;
 
     public function __construct()

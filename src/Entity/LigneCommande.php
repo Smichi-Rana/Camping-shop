@@ -19,13 +19,13 @@ class LigneCommande
     #[ORM\Column]
     private ?float $prixUnitaire = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
+    #[ORM\ManyToOne(targetEntity: commande::class, inversedBy: 'ligneCommandes')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Commande $commande = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'ligneCommandes')]
     private ?Product $product = null;
+
 
     public function getId(): ?int
     {

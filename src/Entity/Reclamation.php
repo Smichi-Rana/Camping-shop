@@ -34,13 +34,14 @@ class Reclamation
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reclamations')]
+    #[ORM\ManyToOne(targetEntity: Commande::class, inversedBy: 'reclamations')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Commande $commande = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reclamations')]
+    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'reclamations')]
     private ?Product $product = null;
-
+    #[ORM\Column(type: 'string', length: 255)]
+    private $sujet;
     public function __construct()
     {
         $this->date = new \DateTimeImmutable();
@@ -52,7 +53,18 @@ class Reclamation
     {
         return $this->id;
     }
+    public function getSujet(): ?string
+    {
+    return $this->sujet;
+    }
 
+    public function setSujet(string $sujet): self
+    {
+        $this->sujet = $sujet;
+        return $this;
+    }
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $reponse = null;
     public function getMessage(): ?string
     {
         return $this->message;
@@ -122,6 +134,16 @@ class Reclamation
     {
         $this->product = $product;
 
+        return $this;
+    }
+    public function getReponse(): ?string
+    {
+        return $this->reponse;
+    }
+
+    public function setReponse(?string $reponse): self
+    {
+        $this->reponse = $reponse;
         return $this;
     }
 }

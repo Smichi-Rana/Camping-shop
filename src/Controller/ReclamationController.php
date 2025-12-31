@@ -12,10 +12,12 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 #[Route('/reclamation')]
 class ReclamationController extends AbstractController
 {
+    // Liste des réclamations
     #[Route('/', name: 'app_reclamation_index', methods: ['GET'])]
     public function index(ReclamationRepository $reclamationRepository): Response
     {
@@ -32,39 +34,39 @@ class ReclamationController extends AbstractController
         ]);
     }
 
+    // Créer une nouvelle réclamation (CLIENT)
     #[Route('/new', name: 'app_reclamation_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')]
     public function new(Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
+        if ($this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+
         $reclamation = new Reclamation();
         $form = $this->createForm(ReclamationType::class, $reclamation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            // Auto fields
             $reclamation->setUser($this->getUser());
             $reclamation->setDate(new \DateTimeImmutable());
             $reclamation->setStatut('En attente');
 
-            // Commande
-            $commande = $form->get('commande')->getData();
-            $reclamation->setCommande($commande);
-
-            // Save
             $em->persist($reclamation);
             $em->flush();
 
-            // ------------ EMAIL ADMIN ---------------
+            // Email admin
             $email = (new Email())
                 ->from('no-reply@tonsite.tn')
-                ->to('admin@example.com') // changer par ton admin
+                ->to('admin@example.com') // email de l'admin
                 ->subject('Nouvelle réclamation #' . $reclamation->getId())
                 ->html($this->renderView('emails/reclamation_new.html.twig', [
                     'reclamation' => $reclamation
                 ]));
 
             $mailer->send($email);
-            // ----------------------------------------
+
+            $this->addFlash('success', 'Votre réclamation a été envoyée.');
 
             return $this->redirectToRoute('app_reclamation_index');
         }
@@ -74,6 +76,7 @@ class ReclamationController extends AbstractController
         ]);
     }
 
+    // Voir une réclamation
     #[Route('/{id}', name: 'app_reclamation_show', methods: ['GET'])]
     public function show(Reclamation $reclamation): Response
     {
@@ -86,15 +89,20 @@ class ReclamationController extends AbstractController
         ]);
     }
 
+    // Editer la réclamation (seulement admin pour changer le statut)
     #[Route('/{id}/edit', name: 'app_reclamation_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Reclamation $reclamation, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(ReclamationType::class, $reclamation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $commande = $form->get('commande')->getData();
-            $reclamation->setCommande($commande);
+            // Exemple : l’admin peut changer le statut
+            $statut = $request->request->get('statut');
+            if ($statut) {
+                $reclamation->setStatut($statut);
+            }
 
             $em->flush();
 
@@ -107,7 +115,8 @@ class ReclamationController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_reclamation_delete', methods: ['POST'])]
+    // Supprimer une réclamation
+    #[Route('/{id}/delete', name: 'app_reclamation_delete', methods: ['POST'])]
     public function delete(Request $request, Reclamation $reclamation, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('delete' . $reclamation->getId(), $request->request->get('_token'))) {
@@ -117,4 +126,26 @@ class ReclamationController extends AbstractController
 
         return $this->redirectToRoute('app_reclamation_index');
     }
+
+    #[Route('/{id}/traiter-page', name: 'app_reclamation_traiter_page', methods: ['GET', 'POST'])]
+    public function traiterPage(Reclamation $reclamation, Request $request, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        if ($request->isMethod('POST')) {
+            // récupérer la réponse de l'admin depuis le formulaire
+            $reclamation->setReponse($request->request->get('reponse'));
+            $reclamation->setStatut('Traitée');
+            $em->flush();
+
+            return $this->redirectToRoute('app_reclamation_index');
+        }
+
+        return $this->render('reclamation/traiter.html.twig', [
+            'reclamation' => $reclamation,
+        ]);
+    }
+
+
 }
+

@@ -50,11 +50,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $phone = null;
 
-    #[ORM\Column]
-    private ?bool $isVerified = null;
+    #[ORM\Column (type:"boolean")]
+    private $isVerified = false;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    #[ORM\Column (type:'datetime_immutable')]
+    private $createdAt;
 
     /**
      * @var Collection<int, Commande>
@@ -74,11 +74,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'user')]
     private Collection $reclamations;
 
+    /**
+     * @var Collection<int, AvisClient>
+     */
+    #[ORM\OneToMany(targetEntity: AvisClient::class, mappedBy: 'user')]
+    private Collection $avisClients;
+
+    /**
+     * @var Collection<int, Paiement>
+     */
+    #[ORM\OneToMany(targetEntity: Paiement::class, mappedBy: 'User')]
+    private Collection $paiements;
+
     public function __construct()
     {
         $this->commandes = new ArrayCollection();
         $this->factures = new ArrayCollection();
         $this->reclamations = new ArrayCollection();
+        $this->avisClients = new ArrayCollection();
+        $this->paiements = new ArrayCollection();
+
+        $this->createdAt = new \DateTimeImmutable(); // <-- ajouté
+        $this->isVerified = false; // déjà présent mais on peut garder pour sécurité
     }
 
     public function getId(): ?int
@@ -222,12 +239,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isVerified(): ?bool
+    public function isVerified(): bool
     {
         return $this->isVerified;
     }
 
-    public function setIsVerified(bool $isVerified): static
+    public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
 
@@ -239,7 +256,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
 
@@ -330,6 +347,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($reclamation->getUser() === $this) {
                 $reclamation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, AvisClient>
+     */
+    public function getAvisClients(): Collection
+    {
+        return $this->avisClients;
+    }
+
+    public function addAvisClient(AvisClient $avisClient): static
+    {
+        if (!$this->avisClients->contains($avisClient)) {
+            $this->avisClients->add($avisClient);
+            $avisClient->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvisClient(AvisClient $avisClient): static
+    {
+        if ($this->avisClients->removeElement($avisClient)) {
+            // set the owning side to null (unless already changed)
+            if ($avisClient->getUser() === $this) {
+                $avisClient->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Paiement>
+     */
+    public function getPaiements(): Collection
+    {
+        return $this->paiements;
+    }
+
+    public function addPaiement(Paiement $paiement): static
+    {
+        if (!$this->paiements->contains($paiement)) {
+            $this->paiements->add($paiement);
+            $paiement->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removePaiement(Paiement $paiement): static
+    {
+        if ($this->paiements->removeElement($paiement)) {
+            // set the owning side to null (unless already changed)
+            if ($paiement->getUser() === $this) {
+                $paiement->setUser(null);
             }
         }
 

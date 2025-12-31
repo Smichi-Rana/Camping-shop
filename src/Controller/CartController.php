@@ -1,7 +1,8 @@
 <?php
 namespace App\Controller;
 
-use App\Repository\ProduitRepository;
+use App\Entity\Product;
+use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,9 +12,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class CartController extends AbstractController
 {
     #[Route('/cart', name: 'cart_index')]
-    public function index(Request $request, ProduitRepository $repo): Response
+    public function index(Request $request, ProductRepository $repo): Response
     {
-        $cart = json_decode($request->cookies->get('cart', '{}'), true);
+        $cart = json_decode($request->cookies->get('cart', '[]'), true);
 
         $data = [];
         $total = 0;
@@ -31,7 +32,7 @@ class CartController extends AbstractController
         }
 
         return $this->render('cart/index.html.twig', [
-            'cart' => $cart,
+            'cart' => $data,
             'total' => $total
         ]);
     }

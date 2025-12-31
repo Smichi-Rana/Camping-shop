@@ -16,6 +16,7 @@ use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use App\Security\LoginFormAuthenticator;
 
 class RegistrationController extends AbstractController
 {
@@ -51,7 +52,7 @@ class RegistrationController extends AbstractController
 
             // do anything else you need here, like send an email
 
-            return $security->login($user, AppCustomAuthenticator::class, 'main');
+            return $security->login($user, LoginFormAuthenticator::class, 'main');
         }
 
         return $this->render('registration/register.html.twig', [

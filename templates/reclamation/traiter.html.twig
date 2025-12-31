@@ -1,0 +1,10 @@
+<h1>Traiter la réclamation #{{ reclamation.id }}</h1>
+
+<p><strong>Message du client :</strong> {{ reclamation.message }}</p>
+<p><strong>Date :</strong> {{ reclamation.date|date('Y-m-d') }}</p>
+
+<form method="post">
+    <label for="reponse">Réponse de l'admin :</label><br>
+    <textarea id="reponse" name="reponse" rows="5" cols="50">{{ reclamation.reponse }}</textarea><br><br>
+    <button type="submit">Envoyer et marquer comme traitée</button>
+</form>

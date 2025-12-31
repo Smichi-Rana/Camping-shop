@@ -1,20 +1,45 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello AvisController!{% endblock %}
+{% block title %}Avis des clients{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <h1>Avis des clients</h1>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {% if avis is empty %}
+        <p>Aucun avis pour le moment.</p>
+    {% else %}
+        <div class="avis-list">
+            {% for item in avis %}
+                <div class="avis-card mb-3 p-3 border rounded">
+                    <div class="avis-header mb-2">
+                        <strong>{{ item.user.firstName }} {{ item.user.lastName }}</strong>
+                        <span class="text-muted" style="float:right;">{{ item.createdAt|date('d/m/Y') }}</span>
+                    </div>
+                    <div class="avis-stars mb-1">
+                        {% for i in 1..5 %}
+                            <span class="star {{ i <= item.note ? 'text-warning' : 'text-secondary' }}">★</span>
+                        {% endfor %}
+                    </div>
+                    <div class="avis-comment">
+                        {{ item.commentaire|nl2br }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>D:/OneDrive/Desktop/my_project/camping-shop/src/Controller/AvisController.php</code></li>
-        <li>Your template at <code>D:/OneDrive/Desktop/my_project/camping-shop/templates/avis/index.html.twig</code></li>
-    </ul>
-</div>
+    <style>
+        .star {
+            font-size: 1.5rem;
+        }
+        .text-warning {
+            color: #ffc107;
+        }
+        .text-secondary {
+            color: #e4e5e9;
+        }
+        .avis-card:hover {
+            background: #f9f9f9;
+        }
+    </style>
 {% endblock %}

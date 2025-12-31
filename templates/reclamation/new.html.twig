@@ -1,19 +1,26 @@
-<div class="container-box">
-    <h2>Nouvelle réclamation</h2>
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Réclamation{% endblock %}
+
+{% block body %}
+    <h2>Nouvelle Réclamation</h2>
 
     {{ form_start(form) }}
-
+    <div class="mb-3">
+        {{ form_label(form.sujet) }}
+        {{ form_widget(form.sujet, {'attr': {'class': 'form-control'}}) }}
+    </div>
     <div class="mb-3">
         {{ form_label(form.message) }}
-        {{ form_widget(form.message, {'attr': {'class': 'form-control'}}) }}
+        {{ form_widget(form.message, {'attr': {'class': 'form-control', 'rows': 5}}) }}
     </div>
 
-    <div class="mb-3">
-        {{ form_label(form.commande) }}
-        {{ form_widget(form.commande, {'attr': {'class': 'form-select'}}) }}
-    </div>
-
-    <button class="btn btn-success btn-custom">Enregistrer</button>
-
+    <button type="submit" class="btn btn-success">Envoyer</button>
     {{ form_end(form) }}
-</div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success mt-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endblock %}
