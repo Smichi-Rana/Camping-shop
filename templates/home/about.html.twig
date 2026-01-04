@@ -1,11 +1,280 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}À propos{% endblock %}
+{% block title %}{{ product.name }} - CampingShop{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .product-detail-card {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid;
+            border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+        }
+
+        .product-image-large {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-info {
+            padding-left: 2rem;
+        }
+
+        .product-category {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .product-title-large {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .rating-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(251, 191, 36, 0.1);
+            border-radius: 15px;
+        }
+
+        .rating-stars-large {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .star-large {
+            color: #fbbf24;
+            font-size: 1.5rem;
+        }
+
+        .rating-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .product-price-large {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+        }
+
+        .product-description {
+            font-size: 1.1rem;
+            color: #718096;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 15px;
+        }
+
+        .product-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .meta-item {
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .meta-label {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .meta-value {
+            font-size: 1.1rem;
+            color: #1a202c;
+            font-weight: 700;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-add-cart {
+            flex: 2;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1.25rem 2rem;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-add-cart:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-back {
+            flex: 1;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 1.25rem 2rem;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .stock-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: #d1fae5;
+            color: #065f46;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .product-info {
+                padding-left: 0;
+                padding-top: 2rem;
+            }
+
+            .product-title-large {
+                font-size: 1.75rem;
+            }
+
+            .product-price-large {
+                font-size: 2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h1>À propos de CampingShop</h1>
-        <p>Nous sommes une équipe de 3 étudiantes qui avons développé ce projet e-commerce pour la gestion du matériel de camping.</p>
-        <p>Ma partie : panier via cookies, avis clients, réclamations, paiement et dashboard.</p>
+    <div class="container">
+        <div class="product-detail-card">
+            <div class="row">
+                <!-- Image Section -->
+                <div class="col-md-6">
+                    <img src="{{ product.image }}" alt="{{ product.name }}" class="product-image-large">
+                </div>
+
+                <!-- Info Section -->
+                <div class="col-md-6 product-info">
+                    <span class="product-category">
+                        <i class="bi bi-tag-fill me-2"></i>{{ product.category }}
+                    </span>
+
+                    <h1 class="product-title-large">{{ product.name }}</h1>
+
+                    <div class="rating-section">
+                        <div class="rating-stars-large">
+                            {% for i in 1..5 %}
+                                <i class="bi bi-star-fill star-large"></i>
+                            {% endfor %}
+                        </div>
+                        <span class="rating-text">{{ product.rating }} / 5</span>
+                    </div>
+
+                    <div class="stock-badge">
+                        <i class="bi bi-check-circle-fill"></i>
+                        En stock ({{ product.stock }} disponibles)
+                    </div>
+
+                    <div class="product-price-large">{{ product.price }}€</div>
+
+                    <div class="product-description">
+                        <p><strong>Description :</strong></p>
+                        <p>{{ product.description }}</p>
+                        <p>Ce produit de haute qualité de la marque <strong>{{ product.brand }}</strong> est conçu pour résister aux conditions les plus difficiles. Parfait pour le camping, la randonnée et toutes vos aventures en plein air.</p>
+                    </div>
+
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Marque</div>
+                            <div class="meta-value">{{ product.brand }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Catégorie</div>
+                            <div class="meta-value">{{ product.category }}</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Stock disponible</div>
+                            <div class="meta-value">{{ product.stock }} unités</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Note moyenne</div>
+                            <div class="meta-value">{{ product.rating }} / 5 ⭐</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <form method="POST" action="{{ path('cart_add', {id: product.id}) }}" style="flex: 2;">
+                            <button type="submit" class="btn-add-cart">
+                                <i class="bi bi-cart-plus" style="font-size: 1.5rem;"></i>
+                                Ajouter au panier
+                            </button>
+                        </form>
+                        <a href="{{ path('app_home') }}" class="btn-back">
+                            <i class="bi bi-arrow-left"></i>
+                            Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
