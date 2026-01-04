@@ -24,8 +24,14 @@ class CartCountExtension extends AbstractExtension
 
     public function getCartCount(): int
     {
-        $session = $this->requestStack->getSession();
-        $cart = $session->get('cart', []);
+        $request = $this->requestStack->getCurrentRequest();
+
+        if (!$request) {
+            return 0;
+        }
+
+        // Utiliser les cookies au lieu de la session
+        $cart = json_decode($request->cookies->get('cart', '{}'), true);
 
         return array_sum($cart);
     }

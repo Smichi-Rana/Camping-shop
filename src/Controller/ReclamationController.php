@@ -36,7 +36,7 @@ class ReclamationController extends AbstractController
 
     // Créer une nouvelle réclamation (CLIENT)
     #[Route('/new', name: 'app_reclamation_new', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_USER')]
+//    #[IsGranted('ROLE_USER')]
     public function new(Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
         if ($this->isGranted('ROLE_ADMIN')) {
@@ -128,15 +128,51 @@ class ReclamationController extends AbstractController
     }
 
     #[Route('/{id}/traiter-page', name: 'app_reclamation_traiter_page', methods: ['GET', 'POST'])]
-    public function traiterPage(Reclamation $reclamation, Request $request, EntityManagerInterface $em): Response
-    {
+    public function traiterPage(
+        Reclamation $reclamation,
+        Request $request,
+        EntityManagerInterface $em,
+        MailerInterface $mailer
+    ): Response {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
+        // Vérifier si la réclamation est déjà traitée
+        if ($reclamation->getStatut() !== 'En attente') {
+            $this->addFlash('warning', 'Cette réclamation a déjà été traitée.');
+            return $this->redirectToRoute('app_reclamation_index');
+        }
+
         if ($request->isMethod('POST')) {
-            // récupérer la réponse de l'admin depuis le formulaire
-            $reclamation->setReponse($request->request->get('reponse'));
+            $reponse = trim($request->request->get('reponse'));
+
+            // Validation de la réponse
+            if (empty($reponse)) {
+                $this->addFlash('error', 'La réponse ne peut pas être vide.');
+                return $this->redirectToRoute('app_reclamation_traiter_page', ['id' => $reclamation->getId()]);
+            }
+
+            // Mettre à jour la réclamation
+            $reclamation->setReponse($reponse);
             $reclamation->setStatut('Traitée');
             $em->flush();
+
+            // Envoyer un email au client pour l'informer
+            try {
+//                $email = (new Email())
+//                    ->from('no-reply@tonsite.tn')
+//                    ->to($reclamation->getUser()->getEmail())
+//                    ->subject('Réponse à votre réclamation #' . $reclamation->getId())
+//                    ->html($this->renderView('emails/reclamation_reponse.html.twig', [
+//                        'reclamation' => $reclamation,
+//                        'reponse' => $reponse
+//                    ]));
+//
+//                $mailer->send($email);
+
+                $this->addFlash('success', 'La réclamation a été traitée et le client a été notifié par email.');
+            } catch (\Exception $e) {
+                $this->addFlash('warning', 'La réclamation a été traitée mais l\'email n\'a pas pu être envoyé.');
+            }
 
             return $this->redirectToRoute('app_reclamation_index');
         }

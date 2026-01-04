@@ -1,10 +1,330 @@
-<h1>Traiter la réclamation #{{ reclamation.id }}</h1>
+{% extends 'base.html.twig' %}
 
-<p><strong>Message du client :</strong> {{ reclamation.message }}</p>
-<p><strong>Date :</strong> {{ reclamation.date|date('Y-m-d') }}</p>
+{% block title %}
+    Traiter la réclamation #{{ reclamation.id }}
+{% endblock %}
 
-<form method="post">
-    <label for="reponse">Réponse de l'admin :</label><br>
-    <textarea id="reponse" name="reponse" rows="5" cols="50">{{ reclamation.reponse }}</textarea><br><br>
-    <button type="submit">Envoyer et marquer comme traitée</button>
-</form>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .traiter-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .page-header .badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .reclamation-details {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .detail-content {
+            color: #2d3748;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .user-details h4 {
+            margin: 0;
+            color: #2d3748;
+            font-size: 1rem;
+        }
+
+        .user-details p {
+            margin: 0.2rem 0 0 0;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .response-form {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            min-height: 150px;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding-top: 1rem;
+            border-top: 2px solid #f7fafc;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-en-attente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+
+        @media (max-width: 768px) {
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .page-header h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="traiter-container">
+        <div class="page-header">
+            <h1>📋 Traiter la réclamation #{{ reclamation.id }}</h1>
+            <span class="badge">Gestion Administrative</span>
+        </div>
+
+        <div class="alert alert-info">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+                Veuillez fournir une réponse détaillée au client. Un email de notification sera envoyé automatiquement.
+            </div>
+        </div>
+
+        <div class="reclamation-details">
+            <h2 style="margin-top: 0; color: #2d3748; margin-bottom: 1.5rem;">📄 Détails de la réclamation</h2>
+
+            <div class="detail-group">
+                <span class="detail-label">👤 Utilisateur</span>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        {{ reclamation.user ? reclamation.user.email|first|upper : 'U' }}
+                    </div>
+                    <div class="user-details">
+                        <h4>{{ reclamation.user ? reclamation.user.email|split('@')|first : 'Utilisateur' }}</h4>
+                        <p>{{ reclamation.user ? reclamation.user.email : 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-group">
+                <span class="detail-label">📅 Date de soumission</span>
+                <div class="detail-content">
+                    {{ reclamation.date|date('d/m/Y à H:i') }}
+                </div>
+            </div>
+
+            <div class="detail-group">
+                <span class="detail-label">🏷️ Statut actuel</span>
+                <div style="padding: 1rem; background: #f7fafc; border-radius: 8px;">
+                    <span class="status-badge status-en-attente">{{ reclamation.statut }}</span>
+                </div>
+            </div>
+
+            <div class="detail-group">
+                <span class="detail-label">💬 Message du client</span>
+                <div class="detail-content">
+                    {{ reclamation.message }}
+                </div>
+            </div>
+        </div>
+
+        <div class="response-form">
+            <h2 style="margin-top: 0; color: #2d3748; margin-bottom: 1.5rem;">✍️ Votre réponse</h2>
+
+            <form method="post">
+                <div class="form-group">
+                    <label for="reponse">
+                        Réponse administrative *
+                    </label>
+                    <textarea
+                        id="reponse"
+                        name="reponse"
+                        required
+                        placeholder="Rédigez une réponse claire et professionnelle au client..."
+                    >{{ reclamation.reponse }}</textarea>
+                    <small style="color: #718096; display: block; margin-top: 0.5rem;">
+                        Cette réponse sera envoyée par email au client.
+                    </small>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ path('app_reclamation_index') }}" class="btn btn-secondary">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                        </svg>
+                        Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Envoyer et marquer comme traitée
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

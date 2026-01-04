@@ -10,8 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CartController extends AbstractController
 {
-    /* ================= PRODUITS ================= */
-
+    // Générer les mêmes produits que HomeController
     private function generateProducts(): array
     {
         $categories = ['Tentes', 'Sacs de couchage', 'Réchauds', 'Lampes', 'Ustensiles', 'Vêtements', 'Accessoires'];
@@ -21,34 +20,37 @@ class CartController extends AbstractController
         for ($i = 1; $i <= 100; $i++) {
             $category = $categories[array_rand($categories)];
             $brand = $brands[array_rand($brands)];
+            $rating = round(rand(35, 50) / 10, 1);
 
             $products[] = [
                 'id' => $i,
-                'name' => $category.' '.$brand.' Model '.$i,
-                'description' => 'Produit de camping de haute qualité.',
+                'name' => $category . ' ' . $brand . ' Model ' . $i,
+                'description' => 'Produit de camping de haute qualité, parfait pour vos aventures en plein air.',
                 'price' => rand(20, 500),
-                'rating' => round(rand(35, 50) / 10, 1),
+                'rating' => $rating,
                 'category' => $category,
                 'brand' => $brand,
                 'stock' => rand(5, 50),
-                'image' => 'https://picsum.photos/seed/'.$i.'/400/400'
+                'image' => 'https://picsum.photos/seed/' . $i . '/400/400'
             ];
         }
 
         return $products;
     }
 
+    // Méthode pour trouver un produit par ID
     private function findProductById(int $id): ?array
     {
-        foreach ($this->generateProducts() as $product) {
+        $products = $this->generateProducts();
+
+        foreach ($products as $product) {
             if ($product['id'] === $id) {
                 return $product;
             }
         }
+
         return null;
     }
-
-    /* ================= PANIER ================= */
 
     #[Route('/cart', name: 'cart_index')]
     public function index(Request $request): Response
@@ -71,11 +73,9 @@ class CartController extends AbstractController
             }
         }
 
-
         return $this->render('cart/index.html.twig', [
-            'cartItems' => $items,
-            'total' => $total,
-            'itemCount' => array_sum($cart)
+            'items' => $items,
+            'total' => $total
         ]);
     }
 
@@ -119,7 +119,26 @@ class CartController extends AbstractController
     {
         $response = $this->redirectToRoute('cart_index');
         $response->headers->setCookie(
-            Cookie::create('cart')->withValue('')->withExpires(1)
+            new Cookie('cart', json_encode([]), strtotime('+30 days'), '/')
+        );
+
+        return $response;
+    }
+
+    #[Route('/cart/update/{id}', name: 'cart_update', methods: ['POST'])]
+    public function update(int $id, Request $request): Response
+    {
+        $quantity = max(1, $request->request->getInt('quantity', 1));
+
+        $cart = json_decode($request->cookies->get('cart', '{}'), true);
+
+        if (isset($cart[$id])) {
+            $cart[$id] = $quantity;
+        }
+
+        $response = $this->redirectToRoute('cart_index');
+        $response->headers->setCookie(
+            new Cookie('cart', json_encode($cart), strtotime('+30 days'), '/')
         );
 
         return $response;

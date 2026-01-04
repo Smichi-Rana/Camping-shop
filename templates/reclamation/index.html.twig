@@ -1,43 +1,952 @@
-{% if is_granted('ROLE_ADMIN') %}
-    <h1>Toutes les réclamations</h1>
-{% else %}
-    <h1>Mes réclamations</h1>
-{% endif %}
+{% extends 'base.html.twig' %}
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Message</th>
-        <th>Date</th>
-        <th>Statut</th>
-        {% if is_granted('ROLE_ADMIN') %}
-            <th>Actions</th>
-        {% endif %}
-    </tr>
-
-    {% for reclamation in reclamations %}
-        <tr>
-            <td>{{ reclamation.id }}</td>
-            <td>{{ reclamation.message }}</td>
-            <td>{{ reclamation.date|date('Y-m-d') }}</td>
-            <td>{{ reclamation.statut }}</td>
-            {% if is_granted('ROLE_ADMIN') %}
-                <td>
-                    {% if reclamation.statut == 'En attente' %}
-                        <a href="{{ path('app_reclamation_traiter_page', {'id': reclamation.id}) }}">Traiter</a>
-                    {% else %}
-                        Déjà traitée
-                    {% endif %}
-                </td>
-            {% endif %}
-        </tr>
+{% block title %}
+    {% if is_granted('ROLE_ADMIN') %}
+        Dashboard - Gestion des réclamations
     {% else %}
-        <tr>
-            <td colspan="5">Aucune réclamation pour le moment.</td>
-        </tr>
-    {% endfor %}
-</table>
+        Mes réclamations
+    {% endif %}
+{% endblock %}
 
-{% if not is_granted('ROLE_ADMIN') %}
-    <a href="{{ path('app_reclamation_new') }}">Nouvelle réclamation</a>
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .reclamation-container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 2.5rem;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-card {
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-card.total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .stats-card.pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .stats-card.completed {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .stats-card.rejected {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .stats-number {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0.5rem 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 1px;
+            opacity: 0.9;
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-modern {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-modern thead {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .table-modern thead th {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            color: #495057;
+            border: none;
+            padding: 1rem;
+        }
+
+        .table-modern tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .table-modern tbody tr:hover {
+            background-color: #f8f9ff;
+            transform: scale(1.01);
+        }
+
+        .table-modern tbody td {
+            padding: 1.25rem 1rem;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 2px solid;
+            gap: 0.5rem;
+        }
+
+        .status-badge.pending {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border-color: #fbbf24;
+        }
+
+        .status-badge.completed {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border-color: #10b981;
+        }
+
+        .status-badge.rejected {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border-color: #ef4444;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #eab308;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-action {
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-treat {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-treat:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a4091 100%);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 1.5rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #667eea;
+        }
+
+        .id-badge {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: #495057;
+        }
+
+        .message-box {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .new-reclamation-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .new-reclamation-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #2d3748;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: #718096;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+
+            .stats-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1>
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        Dashboard - Gestion des réclamations
+                    {% else %}
+                        Mes réclamations
+                    {% endif %}
+                </h1>
+                <p class="mb-0">
+                    {% if reclamations|length > 0 %}
+                        <strong>{{ reclamations|length }}</strong> réclamation(s)
+                        {% if is_granted('ROLE_ADMIN') %}
+                            au total dans le système
+                        {% else %}
+                            enregistrée(s)
+                        {% endif %}
+                    {% else %}
+                        Aucune réclamation pour le moment
+                    {% endif %}
+                </p>
+            </div>
+
+            {% if not is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_reclamation_new') }}" class="new-reclamation-btn">
+                    <i class="bi bi-plus-circle"></i>
+                    Nouvelle réclamation
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Dashboard Statistics (Admin only) -->
+    {% if is_granted('ROLE_ADMIN') %}
+        {% set enAttente = reclamations|filter(r => r.statut == 'En attente')|length %}
+        {% set traitees = reclamations|filter(r => r.statut == 'Traitée')|length %}
+        {% set rejetees = reclamations|filter(r => r.statut == 'Rejetée')|length %}
+        {% set totalReclamations = reclamations|length %}
+
+        {# Calcul des pourcentages #}
+        {% set tauxTraitement = totalReclamations > 0 ? ((traitees / totalReclamations) * 100)|round(1) : 0 %}
+        {% set tauxRejet = totalReclamations > 0 ? ((rejetees / totalReclamations) * 100)|round(1) : 0 %}
+        {% set tauxEnAttente = totalReclamations > 0 ? ((enAttente / totalReclamations) * 100)|round(1) : 0 %}
+
+        {# Réclamations par période #}
+        {% set dateLimit7 = date('-7 days') %}
+        {% set dateLimit30 = date('-30 days') %}
+        {% set reclamations7jours = reclamations|filter(r => r.date > dateLimit7)|length %}
+        {% set reclamations30jours = reclamations|filter(r => r.date > dateLimit30)|length %}
+
+        {# Calcul par mois (derniers 6 mois) #}
+        {% set moisActuel = date('now')|date('n') %}
+        {% set anneeActuelle = date('now')|date('Y') %}
+
+        <!-- Main Statistics Cards -->
+        <div class="row g-4 mb-4">
+            <!-- Total Réclamations -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card total">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="stats-label">Total Réclamations</div>
+                            <div class="stats-number">{{ totalReclamations }}</div>
+                            <small>
+                                <i class="bi bi-calendar-week me-1"></i>
+                                +{{ reclamations7jours }} cette semaine
+                            </small>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-inbox-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- En attente -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card pending">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="stats-label">En Attente</div>
+                            <div class="stats-number">{{ enAttente }}</div>
+                            <small>
+                                <i class="bi bi-percent me-1"></i>
+                                {{ tauxEnAttente }}% du total
+                            </small>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Traitées -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card completed">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="stats-label">Traitées</div>
+                            <div class="stats-number">{{ traitees }}</div>
+                            <small>
+                                <i class="bi bi-graph-up-arrow me-1"></i>
+                                {{ tauxTraitement }}% de réussite
+                            </small>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rejetées -->
+            <div class="col-lg-3 col-md-6">
+                <div class="stats-card rejected">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="stats-label">Rejetées</div>
+                            <div class="stats-number">{{ rejetees }}</div>
+                            <small>
+                                <i class="bi bi-x-circle me-1"></i>
+                                {{ tauxRejet }}% du total
+                            </small>
+                        </div>
+                        <div class="stats-icon">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row g-4 mb-4">
+            <!-- Pie Chart - Distribution des statuts -->
+            <div class="col-lg-4 col-md-6">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="bi bi-pie-chart-fill text-primary"></i>
+                        Distribution des statuts
+                    </div>
+                    <canvas id="statusPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bar Chart - Réclamations par mois -->
+            <div class="col-lg-8 col-md-6">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="bi bi-bar-chart-fill text-success"></i>
+                        Évolution mensuelle (6 derniers mois)
+                    </div>
+                    <canvas id="monthlyBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- Line Chart - Tendance -->
+            <div class="col-lg-8">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="bi bi-graph-up text-info"></i>
+                        Tendance des réclamations
+                    </div>
+                    <canvas id="trendLineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Doughnut Chart - Taux de traitement -->
+            <div class="col-lg-4">
+                <div class="chart-container">
+                    <div class="chart-title">
+                        <i class="bi bi-speedometer2 text-warning"></i>
+                        Performance
+                    </div>
+                    <canvas id="performanceDoughnut"></canvas>
+                    <div class="text-center mt-3">
+                        <div class="metric-value" style="color: #10b981;">{{ tauxTraitement }}%</div>
+                        <div class="metric-label">Taux de traitement</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Metrics -->
+        <div class="row g-4 mb-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="metric-card" style="border-left-color: #667eea;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Cette semaine</div>
+                            <div class="metric-value">{{ reclamations7jours }}</div>
+                        </div>
+                        <i class="bi bi-calendar-week" style="font-size: 2rem; color: #667eea;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="metric-card" style="border-left-color: #10b981;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Ce mois</div>
+                            <div class="metric-value">{{ reclamations30jours }}</div>
+                        </div>
+                        <i class="bi bi-calendar-month" style="font-size: 2rem; color: #10b981;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="metric-card" style="border-left-color: #f59e0b;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Moyenne/jour</div>
+                            <div class="metric-value">{{ totalReclamations > 0 ? (reclamations30jours / 30)|round(1) : 0 }}</div>
+                        </div>
+                        <i class="bi bi-graph-up" style="font-size: 2rem; color: #f59e0b;"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="metric-card" style="border-left-color: #ef4444;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="metric-label">Temps moyen</div>
+                            <div class="metric-value">2.4j</div>
+                        </div>
+                        <i class="bi bi-hourglass-split" style="font-size: 2rem; color: #ef4444;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Reclamations Table -->
+    {% if reclamations|length > 0 %}
+        <div class="reclamation-container">
+            <h5 class="fw-bold mb-4">
+                <i class="bi bi-list-ul me-2"></i>
+                Liste des réclamations
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-modern mb-0">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <th>Utilisateur</th>
+                        {% endif %}
+                        <th>Message</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <th class="text-end">Actions</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for reclamation in reclamations %}
+                        <tr>
+                            <td>
+                                <span class="id-badge">#{{ reclamation.id }}</span>
+                            </td>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-2">
+                                            {{ reclamation.user ? reclamation.user.email|first|upper : 'U' }}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold">{{ reclamation.user ? reclamation.user.email|split('@')|first : 'Utilisateur' }}</div>
+                                            <small class="text-muted">{{ reclamation.user ? reclamation.user.email : 'N/A' }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                            {% endif %}
+                            <td>
+                                <div class="message-box">
+                                    <i class="bi bi-chat-left-text text-primary me-2"></i>
+                                    {{ reclamation.message|length > 80 ? reclamation.message|slice(0, 80) ~ '...' : reclamation.message }}
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <i class="bi bi-calendar3 text-muted me-1"></i>
+                                    <strong>{{ reclamation.date|date('d/m/Y') }}</strong>
+                                </div>
+                                <small class="text-muted">{{ reclamation.date|date('H:i') }}</small>
+                            </td>
+                            <td>
+                                {% if reclamation.statut == 'En attente' %}
+                                    <span class="status-badge pending">
+                                            <span class="pulse-dot"></span>
+                                            En attente
+                                        </span>
+                                {% elseif reclamation.statut == 'Traitée' %}
+                                    <span class="status-badge completed">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            Traitée
+                                        </span>
+                                {% elseif reclamation.statut == 'Rejetée' %}
+                                    <span class="status-badge rejected">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                            Rejetée
+                                        </span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ reclamation.statut }}</span>
+                                {% endif %}
+                            </td>
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <td class="text-end">
+                                    {% if reclamation.statut == 'En attente' %}
+                                        <a href="{{ path('app_reclamation_traiter_page', {'id': reclamation.id}) }}" class="btn btn-treat btn-action">
+                                            <i class="bi bi-pencil-square me-1"></i>
+                                            Traiter
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-secondary btn-action" disabled>
+                                            <i class="bi bi-check-lg me-1"></i>
+                                            Déjà traitée
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div class="reclamation-container">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h2 class="h4 fw-bold mb-3">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        Aucune réclamation enregistrée
+                    {% else %}
+                        Vous n'avez aucune réclamation
+                    {% endif %}
+                </h2>
+                <p class="text-muted mb-4">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        Les réclamations des utilisateurs apparaîtront ici.
+                    {% else %}
+                        Commencez par créer votre première réclamation.
+                    {% endif %}
+                </p>
+                {% if not is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_reclamation_new') }}" class="new-reclamation-btn">
+                        <i class="bi bi-plus-circle"></i>
+                        Créer une réclamation
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Chart.js Scripts -->
+{% if is_granted('ROLE_ADMIN') and reclamations|length > 0 %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // Données des réclamations
+        const enAttente = {{ enAttente }};
+        const traitees = {{ traitees }};
+        const rejetees = {{ rejetees }};
+
+        // Calcul des données mensuelles
+        const reclamationsData = {{ reclamations|json_encode|raw }};
+        const monthlyData = calculateMonthlyData(reclamationsData);
+
+        function calculateMonthlyData(data) {
+            const months = [];
+            const counts = { enAttente: [], traitees: [], rejetees: [] };
+            const now = new Date();
+
+            // Générer les 6 derniers mois
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const monthName = date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
+                months.push(monthName);
+
+                // Compter les réclamations pour ce mois
+                let enAttenteCount = 0, traiteesCount = 0, rejeteesCount = 0;
+
+                data.forEach(rec => {
+                    const recDate = new Date(rec.date.date);
+                    if (recDate.getMonth() === date.getMonth() && recDate.getFullYear() === date.getFullYear()) {
+                        if (rec.statut === 'En attente') enAttenteCount++;
+                        else if (rec.statut === 'Traitée') traiteesCount++;
+                        else if (rec.statut === 'Rejetée') rejeteesCount++;
+                    }
+                });
+
+                counts.enAttente.push(enAttenteCount);
+                counts.traitees.push(traiteesCount);
+                counts.rejetees.push(rejeteesCount);
+            }
+
+            return { months, counts };
+        }
+
+        // 1. Pie Chart - Distribution des statuts
+        const pieCtx = document.getElementById('statusPieChart');
+        if (pieCtx) {
+            new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['En attente', 'Traitées', 'Rejetées'],
+                    datasets: [{
+                        data: [enAttente, traitees, rejetees],
+                        backgroundColor: [
+                            'rgba(245, 158, 11, 0.8)',
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(239, 68, 68, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(245, 158, 11, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Bar Chart - Réclamations par mois
+        const barCtx = document.getElementById('monthlyBarChart');
+        if (barCtx) {
+            new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyData.months,
+                    datasets: [
+                        {
+                            label: 'En attente',
+                            data: monthlyData.counts.enAttente,
+                            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+                            borderColor: 'rgba(245, 158, 11, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Traitées',
+                            data: monthlyData.counts.traitees,
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            borderWidth: 2
+                        },
+                        {
+                            label: 'Rejetées',
+                            data: monthlyData.counts.rejetees,
+                            backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 3. Line Chart - Tendance
+        const lineCtx = document.getElementById('trendLineChart');
+        if (lineCtx) {
+            const totalByMonth = monthlyData.counts.enAttente.map((val, idx) =>
+                val + monthlyData.counts.traitees[idx] + monthlyData.counts.rejetees[idx]
+            );
+
+            new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyData.months,
+                    datasets: [{
+                        label: 'Total réclamations',
+                        data: totalByMonth,
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // 4. Doughnut Chart - Performance
+        const doughnutCtx = document.getElementById('performanceDoughnut');
+        if (doughnutCtx) {
+            const total = enAttente + traitees + rejetees;
+            const tauxTraitement = total > 0 ? ((traitees / total) * 100).toFixed(1) : 0;
+            const reste = 100 - tauxTraitement;
+
+            new Chart(doughnutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Traitées', 'Autres'],
+                    datasets: [{
+                        data: [tauxTraitement, reste],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.8)',
+                            'rgba(229, 231, 235, 0.5)'
+                        ],
+                        borderColor: [
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(209, 213, 219, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.parsed.toFixed(1) + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 {% endif %}
+
+{% endblock %}

@@ -30,7 +30,7 @@ class HomeController extends AbstractController
                 'category' => $category,
                 'brand' => $brand,
                 'stock' => rand(5, 50),
-                'image' => 'https://picsum.photos/seed/' . $i . '/400/400'
+                'image' => 'https://png.pngtree.com/thumb_back/fh260/background/20240522/pngtree-abstract-cloudy-background-beautiful-natural-streaks-of-sky-and-clouds-red-image_15684333.jpg'
             ];
         }
 
