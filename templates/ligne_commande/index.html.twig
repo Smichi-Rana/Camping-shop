@@ -1,14 +1,95 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Lignes de commande{% endblock %}
+{% block title %}Lignes de Commande{% endblock %}
 
 {% block body %}
-    <h1>Lignes de commande</h1>
-    <ul>
-        {% for ligne in lignes %}
-            <li>{{ ligne.product.titre }} - Quantité: {{ ligne.quantite }} - Prix: {{ ligne.prixUnitaire }}</li>
+    <div class="content-card">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="bi bi-list-ul"></i> Lignes de Commande
+            </h1>
+            <a href="{{ path('app_ligne_commande_new') }}" class="btn-primary-custom">
+                <i class="bi bi-plus-circle"></i> Nouvelle Ligne
+            </a>
+        </div>
+
+        {% if ligne_commandes is empty %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Aucune ligne de commande trouvée. <a href="{{ path('app_ligne_commande_new') }}" class="alert-link">Créer la première ligne</a>
+            </div>
         {% else %}
-            <li>Aucune ligne trouvée.</li>
-        {% endfor %}
-    </ul>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Commande</th>
+                        <th>Produit</th>
+                        <th>Quantité</th>
+                        <th>Prix Unitaire</th>
+                        <th>Sous-total</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ligne in ligne_commandes %}
+                        <tr>
+                            <td><strong>#{{ ligne.id }}</strong></td>
+                            <td>
+                                {% if ligne.commande %}
+                                    <a href="{{ path('app_commande_show', {'id': ligne.commande.id}) }}" class="text-decoration-none">
+                                        Commande #{{ ligne.commande.id }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Non assignée</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if ligne.produit %}
+                                    <strong>{{ ligne.produit.nom }}</strong>
+                                {% else %}
+                                    <span class="text-muted">Produit supprimé</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-primary">{{ ligne.quantite }}</span>
+                            </td>
+                            <td>{{ ligne.prixUnitaire|number_format(2, ',', ' ') }} €</td>
+                            <td><strong>{{ (ligne.quantite * ligne.prixUnitaire)|number_format(2, ',', ' ') }} €</strong></td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ path('app_ligne_commande_show', {'id': ligne.id}) }}"
+                                       class="btn btn-sm btn-info" title="Voir">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_ligne_commande_edit', {'id': ligne.id}) }}"
+                                       class="btn btn-sm btn-warning" title="Modifier">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form method="post"
+                                          action="{{ path('app_ligne_commande_delete', {'id': ligne.id}) }}"
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette ligne ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ligne.id) }}">
+                                        <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-4">
+                <p class="text-muted">
+                    <i class="bi bi-info-circle"></i>
+                    Total : <strong>{{ ligne_commandes|length }}</strong> ligne(s) de commande
+                </p>
+            </div>
+        {% endif %}
+    </div>
 {% endblock %}

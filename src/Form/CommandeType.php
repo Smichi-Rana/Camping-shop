@@ -31,7 +31,7 @@ class CommandeType extends AbstractType
             ])
             ->add('user', EntityType::class, [
                 'class' => User::class,
-                'choice_label' => 'username', // adapte selon ton entité User
+                'choice_label' => 'nom', // adapte selon ton entité User
                 'label' => 'Utilisateur',
             ])
         ;

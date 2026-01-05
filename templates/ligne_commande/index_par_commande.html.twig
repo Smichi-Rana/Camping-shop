@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Lignes de Commande #{{ commande.id }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Lignes de Commande pour la Commande #{{ commande.id }}</h1>
+        <p>Date: {{ commande.dateCommande|date('d/m/Y') }} | Statut: {{ commande.status }} | Total: {{ commande.montantTotal }} €</p>
+
+        <a href="{{ path('app_ligne_commande_choisir') }}" class="btn btn-secondary mb-3">
+            ← Retour aux commandes
+        </a>
+        <a href="{{ path('app_ligne_commande_new', {'commandeId': commande.id}) }}" class="btn btn-primary mb-3">
+            + Ajouter une ligne
+        </a>
+
+        {% if ligneCommandes is empty %}
+            <div class="alert alert-info">
+                Aucune ligne de commande trouvée pour cette commande.
+            </div>
+        {% else %}
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produit</th>
+                    <th>Quantité</th>
+                    <th>Prix Unitaire</th>
+                    <th>Sous-total</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for ligne in ligneCommandes %}
+                    <tr>
+                        <td>{{ ligne.id }}</td>
+                        <td>
+                            {% if ligne.product %}
+                                {{ ligne.product.nom }}
+                            {% else %}
+                                Produit non spécifié
+                            {% endif %}
+                        </td>
+                        <td>{{ ligne.quantite }}</td>
+                        <td>{{ ligne.prixUnitaire }} €</td>
+                        <td>{{ ligne.quantite * ligne.prixUnitaire }} €</td>
+                        <td>
+                            <a href="{{ path('app_ligne_commande_show', {'id': ligne.id}) }}" class="btn btn-info btn-sm">Voir</a>
+                            <a href="{{ path('app_ligne_commande_edit', {'id': ligne.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                            {{ include('ligne_commande/_delete_form.html.twig') }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr class="table-dark">
+                    <td colspan="4" class="text-end"><strong>Total Commande:</strong></td>
+                    <td><strong>{{ commande.montantTotal }} €</strong></td>
+                    <td></td>
+                </tr>
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+{% endblock %}

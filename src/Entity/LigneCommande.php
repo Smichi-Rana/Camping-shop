@@ -14,30 +14,69 @@ class LigneCommande
     private ?int $id = null;
 
     #[ORM\Column]
-    private ?int $quantite = null;
+    private int $quantite;
 
     #[ORM\Column]
-    private ?float $prixUnitaire = null;
+    private float $prixUnitaire;
 
-    // La commande à laquelle cette ligne appartient
+    // 🔗 Relation avec Commande (ManyToOne)
     #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Commande $commande = null;
 
-    // Le produit associé à cette ligne
+    // 🔗 Relation avec Product (ManyToOne)
     #[ORM\ManyToOne(inversedBy: 'ligneCommandes')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Product $product = null;
 
     // -------- Getters & Setters --------
-    public function getId(): ?int { return $this->id; }
-    public function getQuantite(): ?int { return $this->quantite; }
-    public function setQuantite(int $quantite): static { $this->quantite = $quantite; return $this; }
 
-    public function getPrixUnitaire(): ?float { return $this->prixUnitaire; }
-    public function setPrixUnitaire(float $prixUnitaire): static { $this->prixUnitaire = $prixUnitaire; return $this; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
 
-    public function getCommande(): ?Commande { return $this->commande; }
-    public function setCommande(?Commande $commande): static { $this->commande = $commande; return $this; }
+    public function getQuantite(): int
+    {
+        return $this->quantite;
+    }
 
-    public function getProduct(): ?Product { return $this->product; }
-    public function setProduct(?Product $product): static { $this->product = $product; return $this; }
+    public function setQuantite(int $quantite): static
+    {
+        $this->quantite = $quantite;
+        return $this;
+    }
+
+    public function getPrixUnitaire(): float
+    {
+        return $this->prixUnitaire;
+    }
+
+    public function setPrixUnitaire(float $prixUnitaire): static
+    {
+        $this->prixUnitaire = $prixUnitaire;
+        return $this;
+    }
+
+    public function getCommande(): ?Commande
+    {
+        return $this->commande;
+    }
+
+    public function setCommande(?Commande $commande): static
+    {
+        $this->commande = $commande;
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): static
+    {
+        $this->product = $product;
+        return $this;
+    }
 }

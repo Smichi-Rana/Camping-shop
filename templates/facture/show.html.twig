@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Facture #{{ facture.id }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Facture #{{ facture.id }}</h2>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Date de facturation :</dt>
+                    <dd class="col-sm-9">{{ facture.dateFacture|date('d/m/Y H:i') }}</dd>
+
+                    <dt class="col-sm-3">Montant :</dt>
+                    <dd class="col-sm-9 fw-bold fs-5 text-success">{{ facture.montant|number_format(2, ',', ' ') }} €</dd>
+
+                    <dt class="col-sm-3">Commande associée :</dt>
+                    <dd class="col-sm-9">
+                        {% if facture.commande %}
+                            <a href="{{ path('app_commande_show', {'id': facture.commande.id}) }}"
+                               class="btn btn-outline-info btn-sm">
+                                Commande #{{ facture.commande.id }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">Aucune</span>
+                        {% endif %}
+                    </dd>
+
+                    <dt class="col-sm-3">Client :</dt>
+                    <dd class="col-sm-9">
+                        {% if facture.user %}
+                            {{ facture.user.email }}
+                        {% else %}
+                            <span class="text-muted">Non spécifié</span>
+                        {% endif %}
+                    </dd>
+                </dl>
+
+                <div class="mt-4">
+                    <a href="{{ path('app_facture_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                    <a href="{{ path('app_facture_edit', {'id': facture.id}) }}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

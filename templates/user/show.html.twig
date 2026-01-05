@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Utilisateur - {{ user.username }}{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user me-2"></i>Détails de l'utilisateur
+                        </h5>
+                        <span class="badge bg-light text-dark">ID: {{ user.id }}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center">
+                                <div class="avatar-circle bg-primary text-white mb-3">
+                                    <i class="fas fa-user fa-3x"></i>
+                                </div>
+                                <h5>{{ user.username }}</h5>
+                                <div class="mt-2">
+                                    {% for role in user.roles %}
+                                        {% if role == 'ROLE_ADMIN' %}
+                                            <span class="badge bg-danger">{{ role }}</span>
+                                        {% elseif role == 'ROLE_USER' %}
+                                            <span class="badge bg-success">{{ role }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ role }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th width="30%"><i class="fas fa-envelope text-muted me-2"></i>Email:</th>
+                                        <td>{{ user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-user text-muted me-2"></i>Nom d'utilisateur:</th>
+                                        <td>{{ user.username }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th><i class="fas fa-calendar text-muted me-2"></i>Date de création:</th>
+                                        <td>{{ user.dateCreation|date('d/m/Y H:i') }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-light border">
+                            <h6 class="fw-bold"><i class="fas fa-info-circle me-2"></i>Informations supplémentaires</h6>
+                            <p class="mb-0">Cet utilisateur peut accéder aux fonctionnalités selon ses rôles attribués.</p>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ path('app_user_index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-list me-1"></i> Liste des utilisateurs
+                            </a>
+                            <div class="btn-group">
+                                <a href="{{ path('app_user_edit', {'id': user.id}) }}" class="btn btn-warning">
+                                    <i class="fas fa-edit me-1"></i> Modifier
+                                </a>
+                                <form method="post" action="{{ path('app_user_delete', {'id': user.id}) }}"
+                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                    <button class="btn btn-danger">
+                                        <i class="fas fa-trash me-1"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .avatar-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .table th {
+            font-weight: 600;
+            color: #6c757d;
+        }
+    </style>
+{% endblock %}

@@ -6,11 +6,12 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -18,59 +19,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 180)]
+    #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $firstName = null;
+    // ✨ NOUVELLES PROPRIÉTÉS
+    #[ORM\Column(length: 100)]
+    private ?string $nom = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $lastName = null;
+    #[ORM\Column(length: 100)]
+    private ?string $prenom = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $adresse = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $codePostal = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $phone = null;
-
-    #[ORM\Column]
-    private ?bool $isVerified = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    /**
-     * @var Collection<int, Commande>
-     */
-    #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'user')]
+    // 🔗 Relations
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Commande::class)]
     private Collection $commandes;
 
-    /**
-     * @var Collection<int, Facture>
-     */
-    #[ORM\OneToMany(targetEntity: Facture::class, mappedBy: 'user')]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Facture::class)]
     private Collection $factures;
 
-    /**
-     * @var Collection<int, Reclamation>
-     */
-    #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'user')]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reclamation::class)]
     private Collection $reclamations;
+
+    #[ORM\Column]
+    private bool $isVerified = false;
 
     public function __construct()
     {
@@ -78,6 +54,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->factures = new ArrayCollection();
         $this->reclamations = new ArrayCollection();
     }
+
+    // ================== Getters / Setters ==================
 
     public function getId(): ?int
     {
@@ -89,160 +67,76 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): static
+    public function setEmail(string $email): self
     {
         $this->email = $email;
-
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
+    // ✨ NOUVEAUX GETTERS/SETTERS
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): self
+    {
+        $this->nom = $nom;
+        return $this;
+    }
+
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+
+    public function setPrenom(string $prenom): self
+    {
+        $this->prenom = $prenom;
+        return $this;
+    }
+
+    // Méthode utilitaire pour afficher le nom complet
+    public function getNomComplet(): string
+    {
+        return $this->prenom . ' ' . $this->nom;
+    }
+
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
-
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
+    public function setRoles(array $roles): self
     {
         $this->roles = $roles;
-
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
-    public function getPassword(): ?string
+    public function getPassword(): string
     {
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    public function setPassword(string $password): self
     {
         $this->password = $password;
-
         return $this;
     }
 
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
-    public function __serialize(): array
-    {
-        $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
-        return $data;
-    }
-
-    #[\Deprecated]
     public function eraseCredentials(): void
     {
-        // @deprecated, to be removed when upgrading to Symfony 8
+        // If you store any temporary, sensitive data on the user, clear it here
     }
 
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
-
-    public function setFirstName(string $firstName): static
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): static
-    {
-        $this->lastName = $lastName;
-
-        return $this;
-    }
-
-    public function getAdresse(): ?string
-    {
-        return $this->adresse;
-    }
-
-    public function setAdresse(string $adresse): static
-    {
-        $this->adresse = $adresse;
-
-        return $this;
-    }
-
-    public function getCodePostal(): ?string
-    {
-        return $this->codePostal;
-    }
-
-    public function setCodePostal(string $codePostal): static
-    {
-        $this->codePostal = $codePostal;
-
-        return $this;
-    }
-
-    public function getPhone(): ?string
-    {
-        return $this->phone;
-    }
-
-    public function setPhone(string $phone): static
-    {
-        $this->phone = $phone;
-
-        return $this;
-    }
-
-    public function isVerified(): ?bool
-    {
-        return $this->isVerified;
-    }
-
-    public function setIsVerified(bool $isVerified): static
-    {
-        $this->isVerified = $isVerified;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
+    // ================== Méthodes pour les relations ==================
 
     /**
      * @return Collection<int, Commande>
@@ -252,25 +146,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->commandes;
     }
 
-    public function addCommande(Commande $commande): static
+    public function addCommande(Commande $commande): self
     {
         if (!$this->commandes->contains($commande)) {
             $this->commandes->add($commande);
             $commande->setUser($this);
         }
-
         return $this;
     }
 
-    public function removeCommande(Commande $commande): static
+    public function removeCommande(Commande $commande): self
     {
         if ($this->commandes->removeElement($commande)) {
-            // set the owning side to null (unless already changed)
             if ($commande->getUser() === $this) {
                 $commande->setUser(null);
             }
         }
-
         return $this;
     }
 
@@ -282,25 +173,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->factures;
     }
 
-    public function addFacture(Facture $facture): static
+    public function addFacture(Facture $facture): self
     {
         if (!$this->factures->contains($facture)) {
             $this->factures->add($facture);
             $facture->setUser($this);
         }
-
         return $this;
     }
 
-    public function removeFacture(Facture $facture): static
+    public function removeFacture(Facture $facture): self
     {
         if ($this->factures->removeElement($facture)) {
-            // set the owning side to null (unless already changed)
             if ($facture->getUser() === $this) {
                 $facture->setUser(null);
             }
         }
-
         return $this;
     }
 
@@ -312,24 +200,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->reclamations;
     }
 
-    public function addReclamation(Reclamation $reclamation): static
+    public function addReclamation(Reclamation $reclamation): self
     {
         if (!$this->reclamations->contains($reclamation)) {
             $this->reclamations->add($reclamation);
             $reclamation->setUser($this);
         }
-
         return $this;
     }
 
-    public function removeReclamation(Reclamation $reclamation): static
+    public function removeReclamation(Reclamation $reclamation): self
     {
         if ($this->reclamations->removeElement($reclamation)) {
-            // set the owning side to null (unless already changed)
             if ($reclamation->getUser() === $this) {
                 $reclamation->setUser(null);
             }
         }
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->isVerified;
+    }
+
+    public function setIsVerified(bool $isVerified): static
+    {
+        $this->isVerified = $isVerified;
 
         return $this;
     }

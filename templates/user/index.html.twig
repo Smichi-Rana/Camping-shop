@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Utilisateurs{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Gestion des Utilisateurs</h1>
+
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Liste des Utilisateurs</h5>
+                <a href="{{ path('app_user_new') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-user-plus"></i> Nouvel Utilisateur
+                </a>
+            </div>
+            <div class="card-body">
+                {% if users|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                            <tr>
+                                <th>#ID</th>
+                                <th>Email</th>
+                                <th>Nom d'utilisateur</th>
+                                <th>Rôles</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <i class="fas fa-envelope me-1 text-muted"></i>
+                                        {{ user.email }}
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-user me-1 text-muted"></i>
+                                        {{ user.username }}
+                                    </td>
+                                    <td>
+                                        {% for role in user.roles %}
+                                            {% if role == 'ROLE_ADMIN' %}
+                                                <span class="badge bg-danger">{{ role }}</span>
+                                            {% elseif role == 'ROLE_USER' %}
+                                                <span class="badge bg-success">{{ role }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ role }}</span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_user_show', {'id': user.id}) }}"
+                                               class="btn btn-info btn-sm"
+                                               title="Voir détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_user_edit', {'id': user.id}) }}"
+                                               class="btn btn-warning btn-sm"
+                                               title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="post"
+                                                  action="{{ path('app_user_delete', {'id': user.id}) }}"
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <h5>Aucun utilisateur trouvé</h5>
+                        <p class="mb-0">Commencez par créer un nouvel utilisateur.</p>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-muted">
+                <small><i class="fas fa-users me-1"></i> Total: {{ users|length }} utilisateur(s)</small>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .table th {
+            font-weight: 600;
+        }
+        .btn-group .btn {
+            border-radius: 0.25rem !important;
+        }
+        .badge {
+            font-size: 0.75em;
+            margin: 0 2px;
+        }
+    </style>
+{% endblock %}

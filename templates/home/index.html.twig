@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - Camping Shop{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Dashboard Camping Shop</h1>
+
+        <div class="row">
+            <!-- Dernières Commandes -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Dernières Commandes</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if commandes is empty %}
+                            <p class="text-muted">Aucune commande pour le moment.</p>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                        <th>Total</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for commande in commandes %}
+                                        <tr>
+                                            <td>{{ commande.id }}</td>
+                                            <td>{{ commande.dateCommande|date('d/m/Y H:i') }}</td>
+                                            <td>
+                                            <span class="badge
+                                                {% if commande.status == 'livrée' %}bg-success
+                                                {% elseif commande.status == 'en cours' %}bg-warning
+                                                {% elseif commande.status == 'annulée' %}bg-danger
+                                                {% else %}bg-secondary{% endif %}">
+                                                {{ commande.status }}
+                                            </span>
+                                            </td>
+                                            <td>{{ commande.montantTotal }} €</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                        <a href="{{ path('app_commande_index') }}" class="btn btn-outline-primary btn-sm">
+                            Voir toutes les commandes
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dernières Factures -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Dernières Factures</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if factures is empty %}
+                            <p class="text-muted">Aucune facture pour le moment.</p>
+                        {% else %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>N° Commande</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for facture in factures %}
+                                        <tr>
+                                            <td>{{ facture.id }}</td>
+                                            <td>{{ facture.num_commande }}</td>
+                                            <td>{{ facture.date|date('d/m/Y') }}</td>
+                                            <td>{{ facture.total }} €</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endif %}
+                        <a href="{{ path('app_facture_index') }}" class="btn btn-outline-success btn-sm">
+                            Voir toutes les factures
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Actions Rapides</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ path('app_commande_new') }}" class="btn btn-primary w-100">
+                                    <i class="fas fa-plus"></i> Nouvelle Commande
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ path('app_facture_new') }}" class="btn btn-success w-100">
+                                    <i class="fas fa-file-invoice"></i> Nouvelle Facture
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ path('app_produit_index') }}" class="btn btn-info w-100">
+                                    <i class="fas fa-box"></i> Gérer Produits
+                                </a>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <a href="{{ path('app_user_index') }}" class="btn btn-warning w-100">
+                                    <i class="fas fa-users"></i> Gérer Clients
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .card-header {
+            border-bottom: none;
+        }
+        .badge {
+            font-size: 0.8em;
+            padding: 0.4em 0.8em;
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+        }
+    </style>
+{% endblock %}

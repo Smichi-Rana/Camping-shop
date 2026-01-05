@@ -9,84 +9,88 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/ligne')]
+#[Route('/ligne-commande')]
 class LigneCommandeController extends AbstractController
 {
-    // Liste toutes les lignes de commande
-    #[Route('/', name: 'ligne_index', methods: ['GET'])]
-    public function index(LigneCommandeRepository $repo): Response
+    #[Route('/', name: 'app_ligne_commande_index', methods: ['GET'])]
+    public function index(LigneCommandeRepository $ligneCommandeRepository): Response
     {
-        $lignes = $repo->findAll();
         return $this->render('ligne_commande/index.html.twig', [
-            'lignes' => $lignes
+            'ligne_commandes' => $ligneCommandeRepository->findAll(),
         ]);
     }
 
-    // Modifier une ligne de commande
-    #[Route('/{id}/edit', name: 'ligne_edit', methods: ['GET','POST'])]
-    public function edit(Request $request, LigneCommande $ligne, EntityManagerInterface $em): Response
+    #[Route('/new', name: 'app_ligne_commande_new', methods: ['GET', 'POST'])]
+    public function new(
+        Request $request,
+        EntityManagerInterface $entityManager
+    ): Response
     {
-        $form = $this->createForm(LigneCommandeType::class, $ligne);
+        $ligneCommande = new LigneCommande();
+        $form = $this->createForm(LigneCommandeType::class, $ligneCommande);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Mettre à jour le prix unitaire si le produit a changé
-            $product = $ligne->getProduct();
-            if ($product) {
-                if (method_exists($product, 'getPrix')) {
-                    $ligne->setPrixUnitaire($product->getPrix());
-                } elseif (method_exists($product, 'getPrice')) {
-                    $ligne->setPrixUnitaire($product->getPrice());
-                }
-            }
+            $entityManager->persist($ligneCommande);
+            $entityManager->flush();
 
-            $em->flush();
-
-            // Recalculer le montant total de la commande
-            $commande = $ligne->getCommande();
-            if ($commande) {
-                $total = 0.0;
-                foreach ($commande->getLigneCommandes() as $lc) {
-                    $total += $lc->getPrixUnitaire() * $lc->getQuantite();
-                }
-                $commande->setMontantTotal($total);
-                $em->flush();
-            }
-
-            $this->addFlash('success', 'Ligne mise à jour.');
-            return $this->redirectToRoute('commande_show', ['id' => $ligne->getCommande()->getId()]);
+            $this->addFlash('success', 'Ligne de commande créée avec succès!');
+            return $this->redirectToRoute('app_ligne_commande_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('ligne_commande/edit.html.twig', [
-            'form' => $form->createView(),
-            'ligne' => $ligne
+        return $this->render('ligne_commande/new.html.twig', [
+            'ligne_commande' => $ligneCommande,
+            'form' => $form,
         ]);
     }
 
-    // Supprimer une ligne de commande
-    #[Route('/{id}/delete', name: 'ligne_delete', methods: ['POST'])]
-    public function delete(Request $request, LigneCommande $ligne, EntityManagerInterface $em): Response
+    #[Route('/{id}', name: 'app_ligne_commande_show', methods: ['GET'])]
+    public function show(LigneCommande $ligneCommande): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$ligne->getId(), $request->request->get('_token'))) {
-            $commande = $ligne->getCommande();
-            $em->remove($ligne);
-            $em->flush();
+        return $this->render('ligne_commande/show.html.twig', [
+            'ligne_commande' => $ligneCommande,
+        ]);
+    }
 
-            // Recalculer le montant total de la commande
-            if ($commande) {
-                $total = 0.0;
-                foreach ($commande->getLigneCommandes() as $lc) {
-                    $total += $lc->getPrixUnitaire() * $lc->getQuantite();
-                }
-                $commande->setMontantTotal($total);
-                $em->flush();
-            }
+    #[Route('/{id}/edit', name: 'app_ligne_commande_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request,
+        LigneCommande $ligneCommande,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        $form = $this->createForm(LigneCommandeType::class, $ligneCommande);
+        $form->handleRequest($request);
 
-            $this->addFlash('success', 'Ligne supprimée.');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Ligne de commande modifiée avec succès!');
+            return $this->redirectToRoute('app_ligne_commande_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->redirectToRoute('commande_index');
+        return $this->render('ligne_commande/edit.html.twig', [
+            'ligne_commande' => $ligneCommande,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_ligne_commande_delete', methods: ['POST'])]
+    public function delete(
+        Request $request,
+        LigneCommande $ligneCommande,
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$ligneCommande->getId(), $request->getPayload()->getString('_token'))) {
+            $entityManager->remove($ligneCommande);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Ligne de commande supprimée avec succès!');
+        }
+
+        return $this->redirectToRoute('app_ligne_commande_index', [], Response::HTTP_SEE_OTHER);
     }
 }

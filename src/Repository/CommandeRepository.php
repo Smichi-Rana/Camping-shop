@@ -13,44 +13,25 @@ class CommandeRepository extends ServiceEntityRepository
         parent::__construct($registry, Commande::class);
     }
 
-    /**
-     * Retourne les commandes par statut (ex: en_attente, validee, livree)
-     */
-    public function findByStatus(string $status): array
+
+    public function findAllWithUser(int $limit = 50): array
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.status = :status')
-            ->setParameter('status', $status)
+            ->select('c.id', 'c.dateCommande', 'c.status', 'c.montantTotal', 'u.email')
+            ->leftJoin('c.user', 'u')
             ->orderBy('c.id', 'DESC')
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
     }
 
-    /**
-     * Retourne les commandes dans un intervalle de dates
-     */
-    public function findByDateRange(\DateTime $start, \DateTime $end): array
+
+    public function findLimited(int $maxResults = 20): array
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.dateCommande BETWEEN :start AND :end')
-            ->setParameter('start', $start)
-            ->setParameter('end', $end)
-            ->orderBy('c.dateCommande', 'DESC')
+            ->orderBy('c.id', 'DESC')
+            ->setMaxResults($maxResults)
             ->getQuery()
             ->getResult();
-    }
-
-    /**
-     * Calcule le montant total d'une commande
-     */
-    public function getMontantTotal(Commande $commande): float
-    {
-        $total = 0;
-
-        foreach ($commande->getLigneCommandes() as $ligne) {
-            $total += $ligne->getQuantite() * $ligne->getPrixUnitaire();
-        }
-
-        return $total;
     }
 }

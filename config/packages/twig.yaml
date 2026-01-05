@@ -3,4 +3,5 @@ twig:
 
 when@test:
     twig:
+        debug: false
         strict_variables: true
