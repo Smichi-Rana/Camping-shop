@@ -30,7 +30,7 @@ class HomeController extends AbstractController
                 'category' => $category,
                 'brand' => $brand,
                 'stock' => rand(5, 50),
-                'image' => 'https://png.pngtree.com/thumb_back/fh260/background/20240522/pngtree-abstract-cloudy-background-beautiful-natural-streaks-of-sky-and-clouds-red-image_15684333.jpg'
+                'image' => 'https://scontent.ftun10-1.fna.fbcdn.net/v/t39.30808-6/499717352_9863637800391583_7562069709485482853_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=ZQRPFfoziskQ7kNvwEUT8TL&_nc_oc=Adm1szkpX276Fky2VAxq8ArlQzivW48BRMRJbRlxYYMkUfb60tj6lBogrX2rRpti4UE&_nc_zt=23&_nc_ht=scontent.ftun10-1.fna&_nc_gid=pX8s8EajYczGLTSCvdTaKQ&oh=00_AfqoAD54uVdRWM883So0i0Ry7sBIYxsaP4-GvosNeb1MmQ&oe=6960E582'
             ];
         }
 
@@ -103,6 +103,6 @@ class HomeController extends AbstractController
     #[Route('/about', name: 'about')]
     public function about(): Response
     {
-        return $this->render('home/about.html.twig');
+        return $this->render('home/aboutRana.html.twig');
     }
 }
