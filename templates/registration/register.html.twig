@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription - CampingShop{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card border-0 shadow-lg rounded-4">
+            <div class="card-body p-5">
+                <h2 class="text-center fw-bold mb-4">Créer un compte</h2>
+
+                {{ form_start(registrationForm) }}
+                    <div class="mb-3">
+                        <label class="form-label">Votre Email</label>
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control rounded-pill', 'placeholder': 'nom@exemple.com'}}) }}
+                        <div class="text-danger small">{{ form_errors(registrationForm.email) }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mot de passe</label>
+                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control rounded-pill', 'placeholder': '••••••••'}}) }}
+                        <div class="text-danger small">{{ form_errors(registrationForm.plainPassword) }}</div>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                        <label class="form-check-label small">J'accepte les conditions d'utilisation</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm" 
+                            style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); border: none;">
+                        S'inscrire
+                    </button>
+                {{ form_end(registrationForm) }}
+
+                <div class="text-center mt-4">
+                    <p class="small text-muted">Déjà un compte ? <a href="{{ path('app_login') }}" class="text-primary text-decoration-none fw-bold">Connectez-vous</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

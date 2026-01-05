@@ -1,0 +1,421 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ product.name }} - CampingShop{% endblock %}
+
+{% block breadcrumb %}
+<nav class="breadcrumb-custom" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{{ path('app_product_index') }}">Produits</a></li>
+        {% if product.category %}
+            <li class="breadcrumb-item"><a href="{{ path('app_product_category', {'id': product.category.id}) }}">{{ product.category.name }}</a></li>
+        {% endif %}
+        <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol>
+</nav>
+{% endblock %}
+
+{% block body %}
+<style>
+    .product-detail-container {
+        background: white;
+        border-radius: 24px;
+        padding: 3rem;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+        margin-bottom: 3rem;
+    }
+
+    .product-image-main {
+        width: 100%;
+        border-radius: 20px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .product-image-main:hover {
+        transform: scale(1.02);
+    }
+
+    .product-detail-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1a202c;
+        margin-bottom: 1rem;
+        line-height: 1.2;
+    }
+
+    .product-category-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        color: #667eea;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .product-detail-price {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 2rem;
+    }
+
+    .product-detail-description {
+        color: #4a5568;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+    }
+
+    .product-features {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    .feature-item:last-child {
+        border-bottom: none;
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .feature-text {
+        font-size: 1rem;
+        color: #4a5568;
+        font-weight: 500;
+    }
+
+    .quantity-selector {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .quantity-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 2px solid #667eea;
+        background: white;
+        color: #667eea;
+        font-size: 1.25rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-btn:hover {
+        background: #667eea;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .quantity-input {
+        width: 80px;
+        text-align: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.5rem;
+    }
+
+    .btn-add-to-cart {
+        padding: 1.25rem 3rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+
+    .btn-add-to-cart:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .btn-secondary-action {
+        padding: 1rem 2rem;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border: 2px solid rgba(102, 126, 234, 0.2);
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-secondary-action:hover {
+        background: rgba(102, 126, 234, 0.2);
+        color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    .related-products-section {
+        margin-top: 4rem;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1a202c;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .section-subtitle {
+        color: #718096;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .product-card-mini {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        height: 100%;
+    }
+
+    .product-card-mini:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 32px rgba(102, 126, 234, 0.15);
+    }
+
+    .product-mini-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .product-mini-content {
+        padding: 1.5rem;
+    }
+
+    .product-mini-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-mini-price {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+
+    .stock-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #d4edda;
+        color: #155724;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .product-detail-container {
+            padding: 2rem 1.5rem;
+        }
+
+        .product-detail-title {
+            font-size: 1.75rem;
+        }
+
+        .product-detail-price {
+            font-size: 2rem;
+        }
+    }
+</style>
+
+<div class="product-detail-container">
+    <div class="row g-4">
+        <!-- Images Column -->
+        <div class="col-lg-6">
+            <div class="position-relative">
+                {% if product.image %}
+                    <img src="{{ asset('uploads/products/' ~ product.image) }}" alt="{{ product.name }}" class="product-image-main">
+                {% else %}
+                    <img src="https://via.placeholder.com/600x500/667eea/ffffff?text={{ product.name|slice(0,1) }}" alt="{{ product.name }}" class="product-image-main">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Details Column -->
+        <div class="col-lg-6">
+            {% if product.category %}
+                <span class="product-category-badge">
+                    <i class="bi bi-tag-fill me-2"></i>{{ product.category.name }}
+                </span>
+            {% endif %}
+
+            <h1 class="product-detail-title">{{ product.name }}</h1>
+
+            <div class="stock-indicator">
+                <i class="bi bi-check-circle-fill"></i>
+                En stock
+            </div>
+
+            <div class="product-detail-price">
+                {{ product.price|number_format(2, ',', ' ') }} DT
+            </div>
+
+            {% if product.description %}
+                <div class="product-detail-description">
+                    {{ product.description }}
+                </div>
+            {% endif %}
+
+            <!-- Features -->
+            <div class="product-features">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-truck"></i>
+                    </div>
+                    <div class="feature-text">Livraison gratuite à partir de 100 DT</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div class="feature-text">Garantie 2 ans</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <i class="bi bi-arrow-repeat"></i>
+                    </div>
+                    <div class="feature-text">Retour gratuit sous 30 jours</div>
+                </div>
+            </div>
+
+            <!-- Quantity Selector -->
+            <div class="quantity-selector">
+                <label class="fw-bold me-3">Quantité:</label>
+                <button class="quantity-btn" onclick="decreaseQuantity()">-</button>
+                <input type="number" id="quantity" class="quantity-input" value="1" min="1" max="99">
+                <button class="quantity-btn" onclick="increaseQuantity()">+</button>
+            </div>
+
+            <!-- Actions -->
+            <a href="{{ path('app_cart') }}" class="btn-add-to-cart">
+                <i class="bi bi-cart-plus-fill" style="font-size: 1.5rem;"></i>
+                Ajouter au panier
+            </a>
+
+            <a href="{{ path('app_product_index') }}" class="btn-secondary-action">
+                <i class="bi bi-arrow-left"></i>
+                Continuer mes achats
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Related Products -->
+{% if relatedProducts|length > 0 %}
+<div class="related-products-section">
+    <h2 class="section-title">
+        <i class="bi bi-stars me-2"></i>Produits similaires
+    </h2>
+    <p class="section-subtitle">Découvrez d'autres produits de la même catégorie</p>
+
+    <div class="row g-4">
+        {% for relatedProduct in relatedProducts %}
+        <div class="col-lg-3 col-md-6">
+            <div class="product-card-mini">
+                {% if relatedProduct.image %}
+                    <img src="{{ asset('uploads/products/' ~ relatedProduct.image) }}" alt="{{ relatedProduct.name }}" class="product-mini-image">
+                {% else %}
+                    <img src="https://via.placeholder.com/400x200/667eea/ffffff?text={{ relatedProduct.name|slice(0,1) }}" alt="{{ relatedProduct.name }}" class="product-mini-image">
+                {% endif %}
+
+                <div class="product-mini-content">
+                    <h3 class="product-mini-title">{{ relatedProduct.name }}</h3>
+                    <div class="product-mini-price">
+                        {{ relatedProduct.price|number_format(2, ',', ' ') }} DT
+                    </div>
+                    <a href="{{ path('app_product_show', {'id': relatedProduct.id}) }}" class="btn-view-product" style="width: 100%; justify-content: center; padding: 0.75rem;">
+                        Voir le produit
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<script>
+    function increaseQuantity() {
+        const input = document.getElementById('quantity');
+        const max = parseInt(input.max);
+        const current = parseInt(input.value);
+        if (current < max) {
+            input.value = current + 1;
+        }
+    }
+
+    function decreaseQuantity() {
+        const input = document.getElementById('quantity');
+        const min = parseInt(input.min);
+        const current = parseInt(input.value);
+        if (current > min) {
+            input.value = current - 1;
+        }
+    }
+</script>
+
+{% endblock %}

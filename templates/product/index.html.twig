@@ -3,65 +3,47 @@
 {% block title %}Gestion des produits{% endblock %}
 
 {% block body %}
-    <h1>Liste des produits</h1>
+<div class="container my-5">
+    <h1>Liste des produits (Admin)</h1>
 
-    {# Formulaire ajout / modification #}
-    <h2>{{ editing is defined and editing ? 'Modifier le produit' : 'Ajouter un nouveau produit' }}</h2>
+    <div class="card p-4 mb-5 shadow-sm">
+        <h2>{{ editing is defined and editing ? 'Modifier' : 'Ajouter' }} un produit</h2>
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+            <button class="btn btn-success mt-3">Enregistrer</button>
+        {{ form_end(form) }}
+    </div>
 
-    {{ form_start(form) }}
-    {{ form_row(form.name) }}
-    {{ form_row(form.description) }}
-    {{ form_row(form.price) }}
-    {{ form_row(form.stock) }}
-    {{ form_row(form.category) }}
-    {{ form_row(form.imageFile) }}
-    {% if editing is defined and editing and productEditing.image %}
-        <img src="{{ asset('uploads/products/' ~ product.image) }}" alt="{{ product.name }}" width="50">
-    {% endif %}
-    <button class="btn btn-success">{{ editing is defined and editing ? 'Modifier' : 'Ajouter' }}</button>
-    {{ form_end(form) }}
-
-    {# Liste des produits existants #}
-    <h2>Produits existants</h2>
-    <table border="1" cellpadding="5">
+    <h2>Produits en base</h2>
+    <table class="table table-striped">
         <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nom</th>
-            <th>Description</th>
-            <th>Prix</th>
-            <th>Stock</th>
-            <th>Catégorie</th>
-            <th>Image</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Prix</th>
+                <th>Stock</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
         {% for product in products %}
             <tr>
                 <td>{{ product.id }}</td>
                 <td>{{ product.name }}</td>
-                <td>{{ product.description }}</td>
-                <td>{{ product.price }}</td>
+                <td>{{ product.price }} DT</td>
                 <td>{{ product.stock }}</td>
-                <td>{{ product.category ? product.category.name : '—' }}</td>
-
                 <td>
                     {% if product.image %}
-                        <img src="{{ asset('uploads/' ~ product.image) }}" alt="{{ product.name }}" width="50">
+                        <img src="{{ asset('uploads/products/' ~ product.image) }}" width="50">
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{{ path('product_edit', {id: product.id}) }}">Modifier</a>
-                    <a href="{{ path('product_delete', {id: product.id}) }}"
-                       onclick="return confirm('Voulez-vous vraiment supprimer ce produit ?');">Supprimer</a>
+                    <a href="{{ path('product_edit', {id: product.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
                 </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="8">Aucun produit trouvé.</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+</div>
 {% endblock %}
