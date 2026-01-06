@@ -23,15 +23,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
-    private array $roles = ["ROLE_CLIENT"];
+    private array $roles = ['ROLE_CLIENT'];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
@@ -50,52 +44,43 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $phone = null;
 
-    #[ORM\Column (type:"boolean")]
-    private $isVerified = false;
+    #[ORM\Column(type: 'boolean')]
+    private bool $isVerified = false;
 
-    #[ORM\Column (type:'datetime_immutable')]
-    private $createdAt;
+    #[ORM\Column(type: 'datetime_immutable')]
+    private \DateTimeImmutable $createdAt;
 
-    /**
-     * @var Collection<int, Commande>
-     */
-    #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'User')]
-    private Collection $commandes;
-
-    /**
-     * @var Collection<int, Facture>
-     */
-    #[ORM\OneToMany(targetEntity: Facture::class, mappedBy: 'user')]
-    private Collection $factures;
+    // ========================================
+    // SEULEMENT CES 3 RELATIONS
+    // ========================================
 
     /**
      * @var Collection<int, Reclamation>
      */
-    #[ORM\OneToMany(targetEntity: Reclamation::class, mappedBy: 'user')]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Reclamation::class)]
     private Collection $reclamations;
 
     /**
-     * @var Collection<int, AvisClient>
+     * @var Collection<int, Avis>
      */
-    #[ORM\OneToMany(targetEntity: AvisClient::class, mappedBy: 'user')]
-    private Collection $avisClients;
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Avis::class)]
+    private Collection $avis;
 
     /**
      * @var Collection<int, Paiement>
      */
-    #[ORM\OneToMany(targetEntity: Paiement::class, mappedBy: 'User')]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Paiement::class)]
     private Collection $paiements;
 
     public function __construct()
     {
-        $this->commandes = new ArrayCollection();
-        $this->factures = new ArrayCollection();
+        // Initialiser seulement les 3 collections
         $this->reclamations = new ArrayCollection();
-        $this->avisClients = new ArrayCollection();
+        $this->avis = new ArrayCollection();
         $this->paiements = new ArrayCollection();
 
-        $this->createdAt = new \DateTimeImmutable(); // <-- ajouté
-        $this->isVerified = false; // déjà présent mais on peut garder pour sécurité
+        $this->createdAt = new \DateTimeImmutable();
+        $this->isVerified = false;
     }
 
     public function getId(): ?int
@@ -111,45 +96,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): ?string
     {
         return $this->password;
@@ -158,25 +126,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
+    #[\Deprecated]
+    public function eraseCredentials(): void
+    {
+    }
+
     public function __serialize(): array
     {
         $data = (array) $this;
         $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
 
         return $data;
-    }
-
-    #[\Deprecated]
-    public function eraseCredentials(): void
-    {
-        // @deprecated, to be removed when upgrading to Symfony 8
     }
 
     public function getFirstName(): ?string
@@ -187,7 +150,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setFirstName(string $firstName): static
     {
         $this->firstName = $firstName;
-
         return $this;
     }
 
@@ -199,7 +161,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastName(string $lastName): static
     {
         $this->lastName = $lastName;
-
         return $this;
     }
 
@@ -211,7 +172,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAdresse(string $adresse): static
     {
         $this->adresse = $adresse;
-
         return $this;
     }
 
@@ -223,7 +183,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setCodePostal(string $codePostal): static
     {
         $this->codePostal = $codePostal;
-
         return $this;
     }
 
@@ -235,7 +194,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhone(string $phone): static
     {
         $this->phone = $phone;
-
         return $this;
     }
 
@@ -244,84 +202,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->isVerified;
     }
 
-    public function setIsVerified(bool $isVerified): self
+    public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
-
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Commande>
-     */
-    public function getCommandes(): Collection
-    {
-        return $this->commandes;
-    }
-
-    public function addCommande(Commande $commande): static
-    {
-        if (!$this->commandes->contains($commande)) {
-            $this->commandes->add($commande);
-            $commande->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeCommande(Commande $commande): static
-    {
-        if ($this->commandes->removeElement($commande)) {
-            // set the owning side to null (unless already changed)
-            if ($commande->getUser() === $this) {
-                $commande->setUser(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, Facture>
-     */
-    public function getFactures(): Collection
-    {
-        return $this->factures;
-    }
-
-    public function addFacture(Facture $facture): static
-    {
-        if (!$this->factures->contains($facture)) {
-            $this->factures->add($facture);
-            $facture->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeFacture(Facture $facture): static
-    {
-        if ($this->factures->removeElement($facture)) {
-            // set the owning side to null (unless already changed)
-            if ($facture->getUser() === $this) {
-                $facture->setUser(null);
-            }
-        }
-
-        return $this;
-    }
+    // ========================================
+    // MÉTHODES POUR LES 3 RELATIONS
+    // ========================================
 
     /**
      * @return Collection<int, Reclamation>
@@ -344,7 +238,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeReclamation(Reclamation $reclamation): static
     {
         if ($this->reclamations->removeElement($reclamation)) {
-            // set the owning side to null (unless already changed)
             if ($reclamation->getUser() === $this) {
                 $reclamation->setUser(null);
             }
@@ -354,29 +247,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, AvisClient>
+     * @return Collection<int, Avis>
      */
-    public function getAvisClients(): Collection
+    public function getAvis(): Collection
     {
-        return $this->avisClients;
+        return $this->avis;
     }
 
-    public function addAvisClient(AvisClient $avisClient): static
+    public function addAvis(Avis $avis): static
     {
-        if (!$this->avisClients->contains($avisClient)) {
-            $this->avisClients->add($avisClient);
-            $avisClient->setUser($this);
+        if (!$this->avis->contains($avis)) {
+            $this->avis->add($avis);
+            $avis->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeAvisClient(AvisClient $avisClient): static
+    public function removeAvis(Avis $avis): static
     {
-        if ($this->avisClients->removeElement($avisClient)) {
-            // set the owning side to null (unless already changed)
-            if ($avisClient->getUser() === $this) {
-                $avisClient->setUser(null);
+        if ($this->avis->removeElement($avis)) {
+            if ($avis->getUser() === $this) {
+                $avis->setUser(null);
             }
         }
 
@@ -404,7 +296,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removePaiement(Paiement $paiement): static
     {
         if ($this->paiements->removeElement($paiement)) {
-            // set the owning side to null (unless already changed)
             if ($paiement->getUser() === $this) {
                 $paiement->setUser(null);
             }

@@ -2,15 +2,10 @@
 
 namespace App\Entity;
 
-
 use App\Repository\ReclamationRepository;
-use App\Repository\CategoryRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-
 
 #[ORM\Entity(repositoryClass: ReclamationRepository::class)]
 class Reclamation
@@ -20,72 +15,71 @@ class Reclamation
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: "Le message est obligatoire.")]
-    private ?string $message = null;
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre est obligatoire")]
+    #[Assert\Length(min: 5, max: 255)]
+    private ?string $titre = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $date = null;
+    #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "La description est obligatoire")]
+    #[Assert\Length(min: 10)]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\Choice(choices: ['en_attente', 'en_cours', 'resolue', 'rejetee'])]
+    private ?string $statut = 'en_attente';
+
+    #[ORM\Column(length: 100)]
+    #[Assert\NotBlank]
+    private ?string $categorie = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $dateCreation = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $dateTraitement = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $statut = "En attente";
+    #[Assert\NotBlank]
+    private ?string $nomUtilisateur = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reclamations')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Assert\Email]
+    private ?string $emailUtilisateur = null;
 
-    #[ORM\ManyToOne(targetEntity: Commande::class, inversedBy: 'reclamations')]
-    #[ORM\JoinColumn(nullable: true)]
-    private ?Commande $commande = null;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $reponse = null;
 
-    #[ORM\ManyToOne(targetEntity: Product::class, inversedBy: 'reclamations')]
-    private ?Product $product = null;
-    #[ORM\Column(type: 'string', length: 255)]
-    private $sujet;
     public function __construct()
     {
-        $this->date = new \DateTimeImmutable();
-        $this->statut = 'En attente';
+        $this->dateCreation = new \DateTime();
     }
-
 
     public function getId(): ?int
     {
         return $this->id;
     }
-    public function getSujet(): ?string
+
+    public function getTitre(): ?string
     {
-    return $this->sujet;
+        return $this->titre;
     }
 
-    public function setSujet(string $sujet): self
+    public function setTitre(string $titre): static
     {
-        $this->sujet = $sujet;
-        return $this;
-    }
-    #[ORM\Column(type: 'text', nullable: true)]
-    private ?string $reponse = null;
-    public function getMessage(): ?string
-    {
-        return $this->message;
-    }
-
-    public function setMessage(string $message): static
-    {
-        $this->message = $message;
-
+        $this->titre = $titre;
         return $this;
     }
 
-    public function getDate(): ?\DateTimeImmutable
+    public function getDescription(): ?string
     {
-        return $this->date;
+        return $this->description;
     }
 
-    public function setDate(\DateTimeImmutable $date): static
+    public function setDescription(string $description): static
     {
-        $this->date = $date;
-
+        $this->description = $description;
         return $this;
     }
 
@@ -97,51 +91,70 @@ class Reclamation
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
-
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getCategorie(): ?string
     {
-        return $this->user;
+        return $this->categorie;
     }
 
-    public function setUser(?User $user): static
+    public function setCategorie(string $categorie): static
     {
-        $this->user = $user;
-
+        $this->categorie = $categorie;
         return $this;
     }
 
-    public function getCommande(): ?Commande
+    public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->commande;
+        return $this->dateCreation;
     }
 
-    public function setCommande(?Commande $commande): static
+    public function setDateCreation(\DateTimeInterface $dateCreation): static
     {
-        $this->commande = $commande;
-
+        $this->dateCreation = $dateCreation;
         return $this;
     }
 
-    public function getProduct(): ?Product
+    public function getDateTraitement(): ?\DateTimeInterface
     {
-        return $this->product;
+        return $this->dateTraitement;
     }
 
-    public function setProduct(?Product $product): static
+    public function setDateTraitement(?\DateTimeInterface $dateTraitement): static
     {
-        $this->product = $product;
-
+        $this->dateTraitement = $dateTraitement;
         return $this;
     }
+
+    public function getNomUtilisateur(): ?string
+    {
+        return $this->nomUtilisateur;
+    }
+
+    public function setNomUtilisateur(string $nomUtilisateur): static
+    {
+        $this->nomUtilisateur = $nomUtilisateur;
+        return $this;
+    }
+
+    public function getEmailUtilisateur(): ?string
+    {
+        return $this->emailUtilisateur;
+    }
+
+    public function setEmailUtilisateur(string $emailUtilisateur): static
+    {
+        $this->emailUtilisateur = $emailUtilisateur;
+        return $this;
+    }
+
     public function getReponse(): ?string
     {
         return $this->reponse;
     }
 
-    public function setReponse(?string $reponse): self
+    public function setReponse(?string $reponse): static
     {
         $this->reponse = $reponse;
         return $this;

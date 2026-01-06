@@ -1,99 +1,82 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Laisser un avis{% endblock %}
+{% block title %}Laisser un Avis{% endblock %}
 
 {% block body %}
     <div class="container mt-5">
-        <div class="card shadow-sm p-4 mx-auto" style="max-width: 600px;">
-            <h2 class="mb-4 text-center">Laisser un avis</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="mb-0">
+                            <i class="fas fa-star"></i> Laisser un Avis
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-4">
+                            Votre avis est important pour nous et aide les autres clients à faire leur choix.
+                        </p>
 
-            {{ form_start(form) }}
+                        {{ form_start(form) }}
 
-            <div class="form-group mb-3">
-                <label>Note</label>
-                <div class="stars-container mb-2">
-                    {% for i in 1..5 %}
-                        <span class="star" data-value="{{ i }}">&#9733;</span>
-                    {% endfor %}
+                        <div class="mb-4">
+                            {{ form_label(form.note, 'Votre note') }}
+                            {{ form_widget(form.note, {'attr': {'class': 'form-select form-select-lg'}}) }}
+                            {{ form_errors(form.note) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.produitService) }}
+                            {{ form_widget(form.produitService) }}
+                            {{ form_errors(form.produitService) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.commentaire) }}
+                            {{ form_widget(form.commentaire) }}
+                            {{ form_errors(form.commentaire) }}
+                            <small class="text-muted">Minimum 10 caractères</small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.nomUtilisateur) }}
+                                {{ form_widget(form.nomUtilisateur) }}
+                                {{ form_errors(form.nomUtilisateur) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.emailUtilisateur) }}
+                                {{ form_widget(form.emailUtilisateur) }}
+                                {{ form_errors(form.emailUtilisateur) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                {{ form_widget(form.estRecommande) }}
+                                {{ form_label(form.estRecommande) }}
+                            </div>
+                            {{ form_errors(form.estRecommande) }}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            Votre avis sera publié après validation par notre équipe.
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check"></i> Publier l'avis
+                            </button>
+                            <a href="{{ path('app_avis_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
                 </div>
-                {{ form_widget(form.note) }}
             </div>
-
-            <div class="form-group mb-3">
-                {{ form_row(form.commentaire, {
-                    'attr': {'placeholder': 'Écrivez votre avis ici...', 'class': 'form-control'}
-                }) }}
-            </div>
-
-            <div class="text-center">
-                <button class="btn btn-primary btn-lg">Envoyer</button>
-            </div>
-
-            {{ form_end(form) }}
         </div>
     </div>
-
-    <style>
-        .card {
-            border-radius: 12px;
-            background-color: #f9f9f9;
-        }
-        .stars-container {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-        }
-        .star {
-            font-size: 2.5em;
-            color: #ccc;
-            cursor: pointer;
-            transition: color 0.2s, transform 0.2s;
-            margin: 0 5px;
-        }
-        .star:hover,
-        .star.hovered,
-        .star.selected {
-            color: #FFD700;
-            transform: scale(1.2);
-        }
-        @media (max-width: 600px) {
-            .star {
-                font-size: 2em;
-                margin: 0 3px;
-            }
-        }
-    </style>
-
-    <script>
-        const stars = document.querySelectorAll('.star');
-        const noteInput = document.getElementById('{{ form.note.vars.id }}');
-
-        function updateStars(value) {
-            stars.forEach(s => {
-                if(s.dataset.value <= value) s.classList.add('selected');
-                else s.classList.remove('selected');
-            });
-        }
-
-        stars.forEach(star => {
-            star.addEventListener('mouseenter', () => {
-                stars.forEach(s => s.classList.remove('hovered'));
-                stars.forEach(s => {
-                    if(s.dataset.value <= star.dataset.value) s.classList.add('hovered');
-                });
-            });
-
-            star.addEventListener('mouseleave', () => {
-                stars.forEach(s => s.classList.remove('hovered'));
-            });
-
-            star.addEventListener('click', () => {
-                const value = star.dataset.value;
-                noteInput.value = value;
-                updateStars(value);
-            });
-        });
-
-        window.addEventListener('load', () => updateStars(noteInput.value || 0));
-    </script>
 {% endblock %}

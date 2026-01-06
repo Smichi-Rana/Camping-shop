@@ -26,7 +26,10 @@ class ReclamationController extends AbstractController
         if ($this->isGranted('ROLE_ADMIN')) {
             $reclamations = $reclamationRepository->findAll();
         } else {
-            $reclamations = $reclamationRepository->findBy(['user' => $user]);
+            // Filtrer par email de l'utilisateur connecté
+            $reclamations = $reclamationRepository->findBy([
+                'emailUtilisateur' => $user->getEmail()
+            ]);
         }
 
         return $this->render('reclamation/index.html.twig', [
@@ -36,37 +39,46 @@ class ReclamationController extends AbstractController
 
     // Créer une nouvelle réclamation (CLIENT)
     #[Route('/new', name: 'app_reclamation_new', methods: ['GET', 'POST'])]
-//    #[IsGranted('ROLE_USER')]
     public function new(Request $request, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
         if ($this->isGranted('ROLE_ADMIN')) {
             throw $this->createAccessDeniedException();
         }
 
+        $user = $this->getUser();
+
+        // Créer la réclamation et PRÉ-REMPLIR les données
         $reclamation = new Reclamation();
+        $reclamation->setNomUtilisateur($user->getFirstName() . ' ' . $user->getLastName());
+        $reclamation->setEmailUtilisateur($user->getEmail());
+
         $form = $this->createForm(ReclamationType::class, $reclamation);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $reclamation->setUser($this->getUser());
-            $reclamation->setDate(new \DateTimeImmutable());
-            $reclamation->setStatut('En attente');
+            // Les infos sont déjà dans l'objet
+            $reclamation->setDateCreation(new \DateTime());
+            $reclamation->setStatut('en_attente'); // ⚠️ Minuscules + underscore
 
             $em->persist($reclamation);
             $em->flush();
 
             // Email admin
-            $email = (new Email())
-                ->from('no-reply@tonsite.tn')
-                ->to('admin@example.com') // email de l'admin
-                ->subject('Nouvelle réclamation #' . $reclamation->getId())
-                ->html($this->renderView('emails/reclamation_new.html.twig', [
-                    'reclamation' => $reclamation
-                ]));
+            try {
+                $email = (new Email())
+                    ->from('no-reply@tonsite.tn')
+                    ->to('admin@example.com')
+                    ->subject('Nouvelle réclamation #' . $reclamation->getId())
+                    ->html($this->renderView('emails/reclamation_new.html.twig', [
+                        'reclamation' => $reclamation
+                    ]));
 
-            $mailer->send($email);
+                $mailer->send($email);
+            } catch (\Exception $e) {
+                // Ignorer l'erreur d'email
+            }
 
-            $this->addFlash('success', 'Votre réclamation a été envoyée.');
+            $this->addFlash('success', '✅ Votre réclamation a été envoyée avec succès !');
 
             return $this->redirectToRoute('app_reclamation_index');
         }
@@ -80,7 +92,10 @@ class ReclamationController extends AbstractController
     #[Route('/{id}', name: 'app_reclamation_show', methods: ['GET'])]
     public function show(Reclamation $reclamation): Response
     {
-        if (!$this->isGranted('ROLE_ADMIN') && $reclamation->getUser() !== $this->getUser()) {
+        $user = $this->getUser();
+
+        // Vérifier si l'utilisateur a le droit de voir cette réclamation
+        if (!$this->isGranted('ROLE_ADMIN') && $reclamation->getEmailUtilisateur() !== $user->getEmail()) {
             throw $this->createAccessDeniedException();
         }
 
@@ -98,7 +113,7 @@ class ReclamationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Exemple : l’admin peut changer le statut
+            // Exemple : l'admin peut changer le statut
             $statut = $request->request->get('statut');
             if ($statut) {
                 $reclamation->setStatut($statut);
@@ -154,20 +169,21 @@ class ReclamationController extends AbstractController
             // Mettre à jour la réclamation
             $reclamation->setReponse($reponse);
             $reclamation->setStatut('Traitée');
+            $reclamation->setDateTraitement(new \DateTime());
             $em->flush();
 
             // Envoyer un email au client pour l'informer
             try {
-//                $email = (new Email())
-//                    ->from('no-reply@tonsite.tn')
-//                    ->to($reclamation->getUser()->getEmail())
-//                    ->subject('Réponse à votre réclamation #' . $reclamation->getId())
-//                    ->html($this->renderView('emails/reclamation_reponse.html.twig', [
-//                        'reclamation' => $reclamation,
-//                        'reponse' => $reponse
-//                    ]));
-//
-//                $mailer->send($email);
+                $email = (new Email())
+                    ->from('no-reply@tonsite.tn')
+                    ->to($reclamation->getEmailUtilisateur())
+                    ->subject('Réponse à votre réclamation #' . $reclamation->getId())
+                    ->html($this->renderView('emails/reclamation_reponse.html.twig', [
+                        'reclamation' => $reclamation,
+                        'reponse' => $reponse
+                    ]));
+
+                $mailer->send($email);
 
                 $this->addFlash('success', 'La réclamation a été traitée et le client a été notifié par email.');
             } catch (\Exception $e) {
@@ -181,7 +197,4 @@ class ReclamationController extends AbstractController
             'reclamation' => $reclamation,
         ]);
     }
-
-
 }
-

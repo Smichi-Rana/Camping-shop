@@ -1,833 +1,351 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}
-    {% if is_granted('ROLE_ADMIN') %}
-        Dashboard - Gestion des réclamations
-    {% else %}
-        Mes réclamations
-    {% endif %}
-{% endblock %}
+{% block title %}Mes réclamations - CampingShop{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
+{% block body %}
     <style>
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        .dashboard-wrapper {
+        .reclamations-container {
+            max-width: 1200px;
+            margin: 2rem auto;
             padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
         }
 
-        .dashboard-header {
-            background: white;
-            border-radius: 20px;
-            padding: 1.5rem 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        .page-header {
+            color: white;
+            margin-bottom: 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
-        .dashboard-header h1 {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #2d3748;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .page-header h1 {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .header-subtitle {
-            font-size: 0.875rem;
-            color: #718096;
-            margin: 0;
+        .btn-new {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
         }
 
-        /* Stats Cards */
-        .stats-grid {
+        .btn-new:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
             background: white;
-            border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-        }
-
-        .stat-card.purple::before { background: linear-gradient(90deg, #667eea, #764ba2); }
-        .stat-card.orange::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
-        .stat-card.green::before { background: linear-gradient(90deg, #10b981, #059669); }
-        .stat-card.red::before { background: linear-gradient(90deg, #ef4444, #dc2626); }
-
-        .stat-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .stat-icon.purple { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
-        .stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: #2d3748;
-            line-height: 1;
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: #718096;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-
-        /* Charts Grid */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .chart-card.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .chart-header {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .chart-container.small {
-            height: 250px;
-        }
-
-        /* Metrics Cards */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .metric-card {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
             text-align: center;
         }
 
-        .metric-value {
+        .stat-icon {
             font-size: 2.5rem;
-            font-weight: 800;
-            color: #2d3748;
-            line-height: 1;
+            margin-bottom: 0.5rem;
         }
 
-        .metric-label {
-            font-size: 0.875rem;
-            color: #718096;
-            margin-top: 0.5rem;
-            font-weight: 600;
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
         }
 
-        .metric-icon {
-            width: 40px;
-            height: 40px;
-            margin: 0 auto 1rem;
-            border-radius: 10px;
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .reclamations-list {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            color: white;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
-        /* Table */
-        .table-card {
+        .reclamation-card {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
         }
 
-        .table-header {
-            font-size: 1.125rem;
-            font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 1.5rem;
+        .reclamation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
-        .custom-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .custom-table thead th {
-            background: #f8f9fa;
-            padding: 1rem;
-            text-align: left;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #718096;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .custom-table tbody td {
-            padding: 1rem;
-            border-bottom: 1px solid #f1f3f5;
-            vertical-align: middle;
-        }
-
-        .custom-table tbody tr:hover {
-            background: #f8f9ff;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .reclamation-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            font-weight: 700;
-            font-size: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
-        .user-name {
-            font-weight: 600;
-            color: #2d3748;
-        }
-
-        .user-email {
-            font-size: 0.75rem;
-            color: #a0aec0;
+        .reclamation-id {
+            font-size: 1.2rem;
+            font-weight: bold;
         }
 
         .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.4rem 0.9rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .status-badge.pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-badge.completed {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .status-badge.rejected {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .action-btn {
             padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
             font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
         }
 
-        .action-btn.primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
+        .status-en_attente {
+            background: #fff3cd;
+            color: #856404;
         }
 
-        .action-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        .status-en_cours {
+            background: #cce5ff;
+            color: #004085;
         }
 
-        .action-btn:disabled {
-            background: #e2e8f0;
-            color: #a0aec0;
-            cursor: not-allowed;
+        .status-resolue {
+            background: #d4edda;
+            color: #155724;
         }
 
-        .pulse-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #f59e0b;
-            animation: pulse 2s infinite;
+        .status-rejetee {
+            background: #f8d7da;
+            color: #721c24;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .reclamation-body {
+            padding: 1.5rem;
         }
 
-        .new-btn {
-            background: white;
-            color: #667eea;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 700;
-            border: 2px solid white;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
+        .reclamation-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .reclamation-meta {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .meta-item {
+            display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .new-btn:hover {
-            background: transparent;
+        .reclamation-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .reclamation-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
             transform: translateY(-2px);
         }
 
         .empty-state {
-            text-align: center;
+            background: white;
             padding: 4rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
         }
 
         .empty-icon {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 1.5rem;
-            border-radius: 50%;
-            background: rgba(102, 126, 234, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            color: #667eea;
-        }
-
-        @media (max-width: 1024px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .metrics-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            font-size: 5rem;
+            margin-bottom: 1rem;
         }
 
         @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .metrics-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .dashboard-header {
+            .page-header {
                 flex-direction: column;
-                gap: 1rem;
+                align-items: flex-start;
             }
         }
     </style>
-{% endblock %}
 
-{% block body %}
-    <div class="dashboard-wrapper">
-        <!-- Dashboard Header -->
-        <div class="dashboard-header">
-            <div>
-                <h1>
-                    <i class="bi bi-speedometer2"></i>
-                    {% if is_granted('ROLE_ADMIN') %}
-                        Dashboard - Gestion des réclamations
-                    {% else %}
-                        Mes réclamations
-                    {% endif %}
-                </h1>
-                <p class="header-subtitle">
-                    {% if reclamations|length > 0 %}
-                        {{ reclamations|length }} réclamation(s)
-                        {% if is_granted('ROLE_ADMIN') %}
-                            au total dans le système
-                        {% else %}
-                            enregistrée(s)
-                        {% endif %}
-                    {% else %}
-                        Aucune réclamation pour le moment
-                    {% endif %}
-                </p>
-            </div>
+    <div class="reclamations-container">
+        <div class="page-header">
+            <h1>{% if is_granted('ROLE_ADMIN') %}📋 Toutes les réclamations{% else %}📝 Mes Réclamations{% endif %}</h1>
             {% if not is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('app_reclamation_new') }}" class="new-btn">
-                    <i class="bi bi-plus-circle"></i>
-                    Nouvelle réclamation
+                <a href="{{ path('app_reclamation_new') }}" class="btn-new">
+                    ➕ Nouvelle réclamation
                 </a>
             {% endif %}
         </div>
 
-        {% if is_granted('ROLE_ADMIN') %}
-            {% set enAttente = reclamations|filter(r => r.statut == 'En attente')|length %}
-            {% set traitees = reclamations|filter(r => r.statut == 'Traitée')|length %}
-            {% set rejetees = reclamations|filter(r => r.statut == 'Rejetée')|length %}
-            {% set totalReclamations = reclamations|length %}
-
-            {% set tauxTraitement = totalReclamations > 0 ? ((traitees / totalReclamations) * 100)|round(1) : 0 %}
-            {% set tauxRejet = totalReclamations > 0 ? ((rejetees / totalReclamations) * 100)|round(1) : 0 %}
-
-            {% set dateLimit7 = date('-7 days') %}
-            {% set dateLimit30 = date('-30 days') %}
-            {% set reclamations7jours = reclamations|filter(r => r.date > dateLimit7)|length %}
-            {% set reclamations30jours = reclamations|filter(r => r.date > dateLimit30)|length %}
-
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card purple">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value">{{ totalReclamations }}</div>
-                            <div class="stat-label">Total Réclamations</div>
-                        </div>
-                        <div class="stat-icon purple">
-                            <i class="bi bi-inbox-fill"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-card orange">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value">{{ enAttente }}</div>
-                            <div class="stat-label">En attente</div>
-                        </div>
-                        <div class="stat-icon orange">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-card green">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value">{{ traitees }}</div>
-                            <div class="stat-label">Traitées</div>
-                        </div>
-                        <div class="stat-icon green">
-                            <i class="bi bi-check-circle-fill"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-card red">
-                    <div class="stat-card-header">
-                        <div>
-                            <div class="stat-value">{{ rejetees }}</div>
-                            <div class="stat-label">Rejetées</div>
-                        </div>
-                        <div class="stat-icon red">
-                            <i class="bi bi-x-circle-fill"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts -->
-            <div class="charts-grid">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <i class="bi bi-pie-chart-fill" style="color: #667eea;"></i>
-                        Distribution des statuts
-                    </div>
-                    <div class="chart-container small">
-                        <canvas id="statusPieChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <i class="bi bi-speedometer2" style="color: #10b981;"></i>
-                        Performance
-                    </div>
-                    <div class="chart-container small">
-                        <canvas id="performanceDoughnut"></canvas>
-                        <div style="text-align: center; margin-top: 1rem;">
-                            <div style="font-size: 2rem; font-weight: 800; color: #10b981;">{{ tauxTraitement }}%</div>
-                            <div style="font-size: 0.875rem; color: #718096; font-weight: 600;">Taux de traitement</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="chart-card full-width">
-                    <div class="chart-header">
-                        <i class="bi bi-graph-up" style="color: #f59e0b;"></i>
-                        Tendance des réclamations (6 derniers mois)
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="trendLineChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Metrics -->
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                        <i class="bi bi-calendar-week"></i>
-                    </div>
-                    <div class="metric-value">{{ reclamations7jours }}</div>
-                    <div class="metric-label">Cette semaine</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
-                        <i class="bi bi-calendar-month"></i>
-                    </div>
-                    <div class="metric-value">{{ reclamations30jours }}</div>
-                    <div class="metric-label">Ce mois</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                        <i class="bi bi-graph-up-arrow"></i>
-                    </div>
-                    <div class="metric-value">{{ totalReclamations > 0 ? (reclamations30jours / 30)|round(1) : 0 }}</div>
-                    <div class="metric-label">Moyenne/jour</div>
-                </div>
-
-                <div class="metric-card">
-                    <div class="metric-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                        <i class="bi bi-hourglass-split"></i>
-                    </div>
-                    <div class="metric-value">2.4j</div>
-                    <div class="metric-label">Temps moyen</div>
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Table -->
         {% if reclamations|length > 0 %}
-            <div class="table-card">
-                <div class="table-header">
-                    <i class="bi bi-list-ul me-2"></i>
-                    Liste des réclamations
+            {# Statistiques #}
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value">{{ reclamations|length }}</div>
+                    <div class="stat-label">Total</div>
                 </div>
-                <div style="overflow-x: auto;">
-                    <table class="custom-table">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <th>Utilisateur</th>
-                            {% endif %}
-                            <th>Message</th>
-                            <th>Date</th>
-                            <th>Statut</th>
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <th style="text-align: right;">Actions</th>
-                            {% endif %}
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for reclamation in reclamations %}
-                            <tr>
-                                <td>
-                                    <span style="font-weight: 700; color: #667eea;">#{{ reclamation.id }}</span>
-                                </td>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value">{{ reclamations|filter(r => r.statut == 'en_attente')|length }}</div>
+                    <div class="stat-label">En attente</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🔄</div>
+                    <div class="stat-value">{{ reclamations|filter(r => r.statut == 'en_cours')|length }}</div>
+                    <div class="stat-label">En cours</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">{{ reclamations|filter(r => r.statut == 'resolue')|length }}</div>
+                    <div class="stat-label">Résolues</div>
+                </div>
+            </div>
+
+            {# Liste des réclamations #}
+            <div class="reclamations-list">
+                {% for reclamation in reclamations %}
+                    <div class="reclamation-card">
+                        <div class="reclamation-header">
+                            <div class="reclamation-id">
+                                🆔 Réclamation #{{ reclamation.id }}
+                            </div>
+                            <span class="status-badge status-{{ reclamation.statut }}">
+                        {% if reclamation.statut == 'en_attente' %}⏳ En attente{% endif %}
+                                {% if reclamation.statut == 'en_cours' %}🔄 En cours{% endif %}
+                                {% if reclamation.statut == 'resolue' %}✅ Résolue{% endif %}
+                                {% if reclamation.statut == 'rejetee' %}❌ Rejetée{% endif %}
+                    </span>
+                        </div>
+
+                        <div class="reclamation-body">
+                            <h3 class="reclamation-title">{{ reclamation.titre }}</h3>
+
+                            <div class="reclamation-meta">
+                                <div class="meta-item">
+                                    <span>📁</span>
+                                    <span>{{ reclamation.categorie|replace({'_': ' '})|title }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>📅</span>
+                                    <span>{{ reclamation.dateCreation|date('d/m/Y à H:i') }}</span>
+                                </div>
                                 {% if is_granted('ROLE_ADMIN') %}
-                                    <td>
-                                        <div class="user-info">
-                                            <div class="user-avatar">
-                                                {{ reclamation.user ? reclamation.user.email|first|upper : 'U' }}
-                                            </div>
-                                            <div>
-                                                <div class="user-name">
-                                                    {{ reclamation.user ? reclamation.user.email|split('@')|first : 'Utilisateur' }}
-                                                </div>
-                                                <div class="user-email">
-                                                    {{ reclamation.user ? reclamation.user.email : 'N/A' }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
+                                    <div class="meta-item">
+                                        <span>👤</span>
+                                        <span>{{ reclamation.nomUtilisateur }}</span>
+                                    </div>
                                 {% endif %}
-                                <td>
-                                    <div style="color: #4a5568;">
-                                        {{ reclamation.message|length > 60 ? reclamation.message|slice(0, 60) ~ '...' : reclamation.message }}
-                                    </div>
-                                </td>
-                                <td>
-                                    <div style="font-weight: 600; color: #2d3748;">
-                                        {{ reclamation.date|date('d/m/Y') }}
-                                    </div>
-                                    <div style="font-size: 0.75rem; color: #a0aec0;">
-                                        {{ reclamation.date|date('H:i') }}
-                                    </div>
-                                </td>
-                                <td>
-                                    {% if reclamation.statut == 'En attente' %}
-                                        <span class="status-badge pending">
-                                                <span class="pulse-dot"></span>
-                                                En attente
-                                            </span>
-                                    {% elseif reclamation.statut == 'Traitée' %}
-                                        <span class="status-badge completed">
-                                                <i class="bi bi-check-circle-fill"></i>
-                                                Traitée
-                                            </span>
-                                    {% elseif reclamation.statut == 'Rejetée' %}
-                                        <span class="status-badge rejected">
-                                                <i class="bi bi-x-circle-fill"></i>
-                                                Rejetée
-                                            </span>
+                            </div>
+
+                            <p class="reclamation-description">
+                                {{ reclamation.description|length > 200 ? reclamation.description|slice(0, 200) ~ '...' : reclamation.description }}
+                            </p>
+
+                            <div class="reclamation-footer">
+                                <div>
+                                    {% if reclamation.dateTraitement %}
+                                        <small style="color: #28a745;">
+                                            ✅ Traitée le {{ reclamation.dateTraitement|date('d/m/Y') }}
+                                        </small>
                                     {% endif %}
-                                </td>
-                                {% if is_granted('ROLE_ADMIN') %}
-                                    <td style="text-align: right;">
-                                        {% if reclamation.statut == 'En attente' %}
-                                            <a href="{{ path('app_reclamation_traiter_page', {'id': reclamation.id}) }}"
-                                               class="action-btn primary">
-                                                Traiter
-                                            </a>
-                                        {% else %}
-                                            <button class="action-btn" disabled>
-                                                Déjà traitée
-                                            </button>
-                                        {% endif %}
-                                    </td>
-                                {% endif %}
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="{{ path('app_reclamation_show', {id: reclamation.id}) }}" class="btn-view">
+                                        👁️ Voir détails
+                                    </a>
+
+                                    {% if is_granted('ROLE_ADMIN') and reclamation.statut == 'en_attente' %}
+                                        <a href="{{ path('app_reclamation_traiter_page', {id: reclamation.id}) }}" class="btn-view" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                                            ✍️ Traiter
+                                        </a>
+                                    {% endif %}
+
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <form method="post" action="{{ path('app_reclamation_delete', {id: reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Supprimer cette réclamation ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                                            <button type="submit" class="btn-delete">🗑️</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
         {% else %}
-            <div class="table-card">
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="bi bi-inbox"></i>
-                    </div>
-                    <h2 style="font-size: 1.5rem; font-weight: 700; color: #2d3748; margin-bottom: 0.5rem;">
-                        {% if is_granted('ROLE_ADMIN') %}
-                            Aucune réclamation enregistrée
-                        {% else %}
-                            Vous n'avez aucune réclamation
-                        {% endif %}
-                    </h2>
-                    <p style="color: #718096; margin-bottom: 2rem;">
-                        {% if is_granted('ROLE_ADMIN') %}
-                            Les réclamations des utilisateurs apparaîtront ici.
-                        {% else %}
-                            Commencez par créer votre première réclamation.
-                        {% endif %}
-                    </p>
-                    {% if not is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_reclamation_new') }}" class="action-btn primary">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            Créer une réclamation
-                        </a>
-                    {% endif %}
-                </div>
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h2>Aucune réclamation</h2>
+                <p>{% if is_granted('ROLE_ADMIN') %}Aucune réclamation n'a été soumise pour le moment.{% else %}Vous n'avez pas encore soumis de réclamation.{% endif %}</p>
+                {% if not is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_reclamation_new') }}" class="btn-new" style="margin-top: 1rem;">
+                        ➕ Créer une réclamation
+                    </a>
+                {% endif %}
             </div>
         {% endif %}
     </div>
-
-    <!-- Chart.js -->
-    {% if is_granted('ROLE_ADMIN') and reclamations|length > 0 %}
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-        <script>
-            const enAttente = {{ enAttente }};
-            const traitees = {{ traitees }};
-            const rejetees = {{ rejetees }};
-            const reclamationsData = {{ reclamations|json_encode|raw }};
-
-            function calculateMonthlyData(data) {
-                const months = [];
-                const counts = { enAttente: [], traitees: [], rejetees: [] };
-                const now = new Date();
-
-                for (let i = 5; i >= 0; i--) {
-                    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                    const monthName = date.toLocaleDateString('fr-FR', { month: 'short' });
-                    months.push(monthName.charAt(0).toUpperCase() + monthName.slice(1));
-
-                    let enAttenteCount = 0, traiteesCount = 0, rejeteesCount = 0;
-
-                    data.forEach(rec => {
-                        const recDate = new Date(rec.date.date);
-                        if (recDate.getMonth() === date.getMonth() && recDate.getFullYear() === date.getFullYear()) {
-                            if (rec.statut === 'En attente') enAttenteCount++;
-                            else if (rec.statut === 'Traitée') traiteesCount++;
-                            else if (rec.statut === 'Rejetée') rejeteesCount++;
-                        }
-                    });
-
-                    counts.enAttente.push(enAttenteCount);
-                    counts.traitees.push(traiteesCount);
-                    counts.rejetees.push(rejeteesCount);
-                }
-
-                return { months, counts };
-            }
-
-            const monthlyData = calculateMonthlyData(reclamationsData);
-
-            // Pie Chart
-            new Chart(document.getElementById('statusPieChart'), {
-                type: 'pie',
-                data: {
-                    labels: ['En attente', 'Traitées', 'Rejetées'],
-                    datasets: [{
-                        data: [enAttente, traitees, rejetees],
-                        backgroundColor: ['rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(239, 68, 68, 0.8)'],
-                        borderColor: ['#f59e0b', '#10b981', '#ef4444'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { padding: 15, font: { size: 11, weight: 'bold' } } },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                    return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Doughnut Chart
-            const total = enAttente + traitees + rejetees;
-            const tauxTraitement = total > 0 ? ((traitees / total) * 100).toFixed(1) : 0;
-            new Chart(document.getElementById('performanceDoughnut'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Traitées', 'Autres'],
-                    datasets: [{
-                        data: [tauxTraitement, 100 - tauxTraitement],
-                        backgroundColor: ['rgba(16, 185, 129, 0.8)', 'rgba(229, 231, 235, 0.5)'],
-                        borderColor: ['#10b981', '#e5e7eb'],
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // Line Chart
-            const totalByMonth = monthlyData.counts.enAttente.map((val, idx) =>
-                val + monthlyData.counts.traitees[idx] + monthlyData.counts.rejetees[idx]
-            );
-            new Chart(document.getElementById('trendLineChart'), {
-                type: 'line',
-                data: {
-                    labels: monthlyData.months,
-                    datasets: [{
-                        label: 'Total réclamations',
-                        data: totalByMonth,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 5,
-                        pointBackgroundColor: '#667eea',
-                        pointBorderColor: '#fff',
-                        pointBorderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true, ticks: { stepSize: 1 } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-        </script>
-    {% endif %}
 {% endblock %}

@@ -1,10 +1,9 @@
 <?php
 
 namespace App\Entity;
-use App\Entity\User;
+
 use App\Repository\PaiementRepository;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\float_;
 
 #[ORM\Entity(repositoryClass: PaiementRepository::class)]
 class Paiement
@@ -13,22 +12,26 @@ class Paiement
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
     #[ORM\ManyToOne(inversedBy: 'paiements')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    //#[ORM\ManyToOne(inversedBy: 'paiements')]
+    //#[ORM\JoinColumn(nullable: false)]
+    //private ?Commande $commande = null;
+
     #[ORM\Column(length: 255)]
     private ?string $methode = null;
 
-    #[ORM\Column(type: 'float')]
+    #[ORM\Column]
     private ?float $montant = null;
 
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column]
     private ?\DateTime $datePaiement = null;
-
-
 
     public function getId(): ?int
     {
@@ -43,7 +46,6 @@ class Paiement
     public function setMethode(string $methode): static
     {
         $this->methode = $methode;
-
         return $this;
     }
 
@@ -55,7 +57,6 @@ class Paiement
     public function setMontant(float $montant): static
     {
         $this->montant = $montant;
-
         return $this;
     }
 
@@ -67,7 +68,6 @@ class Paiement
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
-
         return $this;
     }
 
@@ -79,19 +79,28 @@ class Paiement
     public function setDatePaiement(\DateTime $datePaiement): static
     {
         $this->datePaiement = $datePaiement;
-
         return $this;
     }
 
     public function getUser(): ?User
     {
-        return $this->User;
+        return $this->user;
     }
 
-    public function setUser(?User $User): static
+    public function setUser(?User $user): static
     {
-        $this->User = $User;
+        $this->user = $user;
+        return $this;
+    }
 
+    public function getCommande(): ?Commande
+    {
+        return $this->commande;
+    }
+
+    public function setCommande(?Commande $commande): static
+    {
+        $this->commande = $commande;
         return $this;
     }
 }

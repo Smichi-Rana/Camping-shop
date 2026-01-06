@@ -1,330 +1,373 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}
-    Traiter la réclamation #{{ reclamation.id }}
-{% endblock %}
+{% block title %}Traiter la réclamation #{{ reclamation.id }} - CampingShop{% endblock %}
 
-{% block stylesheets %}
-    {{ parent() }}
+{% block body %}
     <style>
         .traiter-container {
             max-width: 900px;
             margin: 2rem auto;
-            padding: 0 1rem;
+            padding: 2rem;
         }
 
-        .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-back {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .traiter-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .traiter-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
             padding: 2rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
-        .page-header h1 {
+        .traiter-header h1 {
+            font-size: 2rem;
             margin: 0;
-            font-size: 1.8rem;
-            font-weight: 600;
         }
 
-        .page-header .badge {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
+        .traiter-body {
+            padding: 2.5rem;
         }
 
-        .reclamation-details {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
-        .detail-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: #4a5568;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .detail-content {
-            color: #2d3748;
-            font-size: 1rem;
-            line-height: 1.6;
-            padding: 1rem;
-            background: #f7fafc;
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1.2rem;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
-
-        .user-info {
+            margin-bottom: 2rem;
+            color: #856404;
             display: flex;
             align-items: center;
             gap: 1rem;
-            padding: 1rem;
-            background: #f7fafc;
-            border-radius: 8px;
         }
 
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
+        .info-icon {
+            font-size: 1.5rem;
+        }
+
+        .reclamation-summary {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 1.2rem;
+            gap: 0.5rem;
         }
 
-        .user-details h4 {
-            margin: 0;
-            color: #2d3748;
+        .summary-text {
+            color: #555;
+            line-height: 1.6;
             font-size: 1rem;
         }
 
-        .user-details p {
-            margin: 0.2rem 0 0 0;
-            color: #718096;
-            font-size: 0.9rem;
-        }
-
-        .response-form {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-        }
-
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .form-group label {
             display: block;
             font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
+            color: #333;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
         }
 
-        .form-group textarea {
+        .required::after {
+            content: ' *';
+            color: #dc3545;
+        }
+
+        .form-control {
             width: 100%;
-            padding: 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            padding: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
             font-size: 1rem;
             font-family: inherit;
             resize: vertical;
-            transition: all 0.3s ease;
-            min-height: 150px;
+            min-height: 200px;
+            transition: all 0.3s;
+            line-height: 1.6;
         }
 
-        .form-group textarea:focus {
+        .form-control:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #28a745;
+            box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
         }
 
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-end;
-            padding-top: 1rem;
-            border-top: 2px solid #f7fafc;
+        .form-control::placeholder {
+            color: #999;
         }
 
-        .btn {
-            padding: 0.8rem 1.5rem;
+        .char-counter {
+            text-align: right;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            padding: 1.3rem;
+            border-radius: 10px;
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-submit:active {
+            transform: translateY(-1px);
+        }
+
+        .client-info {
+            background: #e7f3ff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #0066cc;
+        }
+
+        .client-info-title {
+            font-weight: 600;
+            color: #0066cc;
+            margin-bottom: 0.8rem;
+            display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .client-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        .client-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
         }
 
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-
-        .btn-secondary:hover {
-            background: #cbd5e0;
-        }
-
-        .btn-danger {
-            background: #f56565;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #e53e3e;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
+        .detail-label {
+            font-size: 0.85rem;
+            color: #666;
             font-weight: 600;
         }
 
-        .status-en-attente {
-            background: #fef3c7;
-            color: #92400e;
+        .detail-value {
+            color: #333;
+            font-weight: 500;
         }
 
-        .alert {
-            padding: 1rem;
+        .tips-box {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 1.2rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
         }
 
-        .alert-info {
-            background: #dbeafe;
-            color: #1e40af;
-            border-left: 4px solid #3b82f6;
+        .tips-title {
+            font-weight: 600;
+            color: #155724;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tips-list {
+            margin: 0;
+            padding-left: 1.5rem;
+            color: #155724;
+        }
+
+        .tips-list li {
+            margin-bottom: 0.5rem;
         }
 
         @media (max-width: 768px) {
-            .form-actions {
-                flex-direction: column;
+            .traiter-header h1 {
+                font-size: 1.5rem;
             }
 
-            .btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .page-header h1 {
-                font-size: 1.4rem;
+            .traiter-body {
+                padding: 1.5rem;
             }
         }
     </style>
-{% endblock %}
 
-{% block body %}
     <div class="traiter-container">
-        <div class="page-header">
-            <h1>📋 Traiter la réclamation #{{ reclamation.id }}</h1>
-            <span class="badge">Gestion Administrative</span>
-        </div>
+        <a href="{{ path('app_reclamation_show', {id: reclamation.id}) }}" class="btn-back">
+            ← Retour aux détails
+        </a>
 
-        <div class="alert alert-info">
-            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <div>
-                Veuillez fournir une réponse détaillée au client. Un email de notification sera envoyé automatiquement.
+        <div class="traiter-card">
+            <div class="traiter-header">
+                <h1>✍️ Traiter la réclamation #{{ reclamation.id }}</h1>
             </div>
-        </div>
 
-        <div class="reclamation-details">
-            <h2 style="margin-top: 0; color: #2d3748; margin-bottom: 1.5rem;">📄 Détails de la réclamation</h2>
-
-            <div class="detail-group">
-                <span class="detail-label">👤 Utilisateur</span>
-                <div class="user-info">
-                    <div class="user-avatar">
-                        {{ reclamation.user ? reclamation.user.email|first|upper : 'U' }}
-                    </div>
-                    <div class="user-details">
-                        <h4>{{ reclamation.user ? reclamation.user.email|split('@')|first : 'Utilisateur' }}</h4>
-                        <p>{{ reclamation.user ? reclamation.user.email : 'N/A' }}</p>
+            <div class="traiter-body">
+                {# Warning Box #}
+                <div class="info-box">
+                    <span class="info-icon">⚠️</span>
+                    <div>
+                        <strong>Attention :</strong> Une fois traitée, la réclamation ne pourra plus être modifiée et le client recevra automatiquement un email de notification avec votre réponse.
                     </div>
                 </div>
-            </div>
 
-            <div class="detail-group">
-                <span class="detail-label">📅 Date de soumission</span>
-                <div class="detail-content">
-                    {{ reclamation.date|date('d/m/Y à H:i') }}
-                </div>
-            </div>
-
-            <div class="detail-group">
-                <span class="detail-label">🏷️ Statut actuel</span>
-                <div style="padding: 1rem; background: #f7fafc; border-radius: 8px;">
-                    <span class="status-badge status-en-attente">{{ reclamation.statut }}</span>
-                </div>
-            </div>
-
-            <div class="detail-group">
-                <span class="detail-label">💬 Message du client</span>
-                <div class="detail-content">
-                    {{ reclamation.message }}
-                </div>
-            </div>
-        </div>
-
-        <div class="response-form">
-            <h2 style="margin-top: 0; color: #2d3748; margin-bottom: 1.5rem;">✍️ Votre réponse</h2>
-
-            <form method="post">
-                <div class="form-group">
-                    <label for="reponse">
-                        Réponse administrative *
-                    </label>
-                    <textarea
-                        id="reponse"
-                        name="reponse"
-                        required
-                        placeholder="Rédigez une réponse claire et professionnelle au client..."
-                    >{{ reclamation.reponse }}</textarea>
-                    <small style="color: #718096; display: block; margin-top: 0.5rem;">
-                        Cette réponse sera envoyée par email au client.
-                    </small>
+                {# Client Info #}
+                <div class="client-info">
+                    <div class="client-info-title">
+                        <span>👤</span>
+                        <span>Informations du client</span>
+                    </div>
+                    <div class="client-details">
+                        <div class="client-detail-item">
+                            <span class="detail-label">Nom</span>
+                            <span class="detail-value">{{ reclamation.nomUtilisateur }}</span>
+                        </div>
+                        <div class="client-detail-item">
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value">{{ reclamation.emailUtilisateur }}</span>
+                        </div>
+                        <div class="client-detail-item">
+                            <span class="detail-label">Date de création</span>
+                            <span class="detail-value">{{ reclamation.dateCreation|date('d/m/Y à H:i') }}</span>
+                        </div>
+                        <div class="client-detail-item">
+                            <span class="detail-label">Catégorie</span>
+                            <span class="detail-value">{{ reclamation.categorie|replace({'_': ' '})|title }}</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-actions">
-                    <a href="{{ path('app_reclamation_index') }}" class="btn btn-secondary">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                        </svg>
-                        Annuler
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        Envoyer et marquer comme traitée
+                {# Réclamation Details #}
+                <div class="reclamation-summary">
+                    <div class="summary-title">
+                        <span>📋</span>
+                        <span>Titre de la réclamation</span>
+                    </div>
+                    <div class="summary-text">
+                        <strong>{{ reclamation.titre }}</strong>
+                    </div>
+                </div>
+
+                <div class="reclamation-summary">
+                    <div class="summary-title">
+                        <span>📄</span>
+                        <span>Description du problème</span>
+                    </div>
+                    <div class="summary-text">{{ reclamation.description }}</div>
+                </div>
+
+                {# Tips Box #}
+                <div class="tips-box">
+                    <div class="tips-title">
+                        <span>💡</span>
+                        <span>Conseils pour une bonne réponse</span>
+                    </div>
+                    <ul class="tips-list">
+                        <li>Commencez par remercier le client pour sa réclamation</li>
+                        <li>Reconnaissez le problème et exprimez vos excuses</li>
+                        <li>Proposez une solution concrète</li>
+                        <li>Soyez professionnel et courtois</li>
+                        <li>Terminez par une formule de politesse</li>
+                    </ul>
+                </div>
+
+                {# Form #}
+                <form method="post">
+                    <div class="form-group">
+                        <label for="reponse" class="required">💬 Votre réponse au client</label>
+                        <textarea
+                            id="reponse"
+                            name="reponse"
+                            class="form-control"
+                            placeholder="Bonjour [Nom du client],&#10;&#10;Nous vous remercions d'avoir pris le temps de nous contacter concernant...&#10;&#10;Nous comprenons votre frustration et nous vous présentons nos sincères excuses pour...&#10;&#10;Pour résoudre ce problème, nous vous proposons...&#10;&#10;Cordialement,&#10;L'équipe CampingShop"
+                            required
+                            minlength="50"></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span> caractères
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <span>✅</span>
+                        <span>Envoyer la réponse et clôturer la réclamation</span>
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
+
+    <script>
+        // Compteur de caractères
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('reponse');
+            const charCount = document.getElementById('charCount');
+
+            textarea.addEventListener('input', function() {
+                charCount.textContent = this.value.length;
+            });
+        });
+    </script>
 {% endblock %}

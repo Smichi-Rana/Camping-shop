@@ -1,0 +1,340 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes commandes - CampingShop{% endblock %}
+
+{% block body %}
+    <style>
+        .commandes-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .commandes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .commande-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .commande-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .commande-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .commande-id {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .commande-date {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-en-attente { background: #fff3cd; color: #856404; }
+        .status-confirmee { background: #d1ecf1; color: #0c5460; }
+        .status-expediee { background: #cce5ff; color: #004085; }
+        .status-livree { background: #d4edda; color: #155724; }
+        .status-annulee { background: #f8d7da; color: #721c24; }
+
+        .commande-body {
+            padding: 1.5rem;
+        }
+
+        .commande-items {
+            margin-bottom: 1rem;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+
+        .item-details {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .item-price {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .commande-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 2px solid #f0f0f0;
+            margin-top: 1rem;
+        }
+
+        .total-amount {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .btn-detail {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-detail:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .empty-state {
+            background: white;
+            padding: 4rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h2 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .btn-shop {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .btn-shop:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .commande-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .commande-footer {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+
+            .btn-detail {
+                text-align: center;
+            }
+        }
+    </style>
+
+    <div class="commandes-container">
+        <div class="page-header">
+            <h1>📦 Mes Commandes</h1>
+            <p>Suivez l'état de vos commandes et consultez votre historique d'achats</p>
+        </div>
+
+        {% if commandes|length > 0 %}
+            {# Statistiques #}
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value">{{ commandes|length }}</div>
+                    <div class="stat-label">Commandes totales</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value">{{ commandes|filter(c => c.status == 'En attente')|length }}</div>
+                    <div class="stat-label">En cours</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">{{ commandes|filter(c => c.status == 'Livrée')|length }}</div>
+                    <div class="stat-label">Livrées</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value">{{ commandes|reduce((total, c) => total + c.montantTotal, 0)|number_format(0, ',', ' ') }} €</div>
+                    <div class="stat-label">Total dépensé</div>
+                </div>
+            </div>
+
+            {# Liste des commandes #}
+            <div class="commandes-list">
+                {% for commande in commandes %}
+                    <div class="commande-card">
+                        <div class="commande-header">
+                            <div>
+                                <div class="commande-id">📋 Commande #{{ commande.id }}</div>
+                                <div class="commande-date">{{ commande.dateCommande|date('d/m/Y à H:i') }}</div>
+                            </div>
+
+                            <span class="status-badge status-{{ commande.status|lower|replace({' ': '-', 'é': 'e'}) }}">
+                        {% if commande.status == 'En attente' %}⏳{% endif %}
+                                {% if commande.status == 'Confirmée' %}✓{% endif %}
+                                {% if commande.status == 'Expédiée' %}🚚{% endif %}
+                                {% if commande.status == 'Livrée' %}✅{% endif %}
+                                {% if commande.status == 'Annulée' %}❌{% endif %}
+                                {{ commande.status }}
+                    </span>
+                        </div>
+
+                        <div class="commande-body">
+                            <div class="commande-items">
+                                {% for ligne in commande.ligneCommandes|slice(0, 3) %}
+                                    <div class="item-row">
+                                        <div class="item-info">
+                                            <div class="item-name">{{ ligne.product.name }}</div>
+                                            <div class="item-details">
+                                                Quantité: {{ ligne.quantite }} × {{ ligne.prixUnitaire|number_format(2, ',', ' ') }} €
+                                            </div>
+                                        </div>
+                                        <div class="item-price">{{ ligne.sousTotal|number_format(2, ',', ' ') }} €</div>
+                                    </div>
+                                {% endfor %}
+
+                                {% if commande.ligneCommandes|length > 3 %}
+                                    <div style="text-align: center; color: #666; padding: 0.5rem 0; font-size: 0.9rem;">
+                                        + {{ commande.ligneCommandes|length - 3 }} autre(s) article(s)
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="commande-footer">
+                                <div>
+                                    <span style="color: #666;">Total : </span>
+                                    <span class="total-amount">{{ commande.montantTotal|number_format(2, ',', ' ') }} €</span>
+                                </div>
+                                <a href="{{ path('app_commande_detail', {id: commande.id}) }}" class="btn-detail">
+                                    👁️ Voir les détails
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            {# État vide #}
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h2>Aucune commande</h2>
+                <p>Vous n'avez pas encore passé de commande.<br>Découvrez nos produits de camping !</p>
+                <a href="{{ path('app_home') }}" class="btn-shop">🛍️ Découvrir nos produits</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
