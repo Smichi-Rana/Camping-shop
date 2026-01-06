@@ -35,22 +35,32 @@
         <div class="row g-4">
             {% for product in products %}
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm">
-                        <div style="height: 250px; overflow: hidden;">
+                    <div class="card h-100 shadow-sm border-0">
+                        {# PARTIE CORRIGÉE : Utilisation du timestamp pour forcer le rafraîchissement du cache #}
+                        <div style="height: 250px; overflow: hidden; background-color: #f8f9fa;" class="d-flex align-items-center justify-content-center">
                             {% if product.image %}
-                                <img src="{{ asset('uploads/products/' ~ product.image) }}" class="card-img-top h-100 w-100 object-fit-cover">
+                                {# On ajoute ?v= suivi d'un nombre aléatoire pour tromper le cache du navigateur #}
+                                <img src="{{ asset('uploads/products/' ~ product.image) }}?v={{ random(1, 1000) }}" 
+                                     class="card-img-top h-100 w-100" 
+                                     style="object-fit: cover;"
+                                     alt="{{ product.name }}">
                             {% else %}
-                                <img src="{{ asset('images/no-image.jpg') }}" class="card-img-top h-100 w-100 object-fit-cover">
+                                <img src="{{ asset('images/no-image.jpg') }}" 
+                                     class="card-img-top h-100 w-100" 
+                                     style="object-fit: cover;"
+                                     alt="Image non disponible">
                             {% endif %}
                         </div>
-                        <div class="card-body">
+
+                        <div class="card-body d-flex flex-column">
                             {% if product.category %}
-                                <span class="badge bg-secondary mb-2">{{ product.category.name }}</span>
+                                <span class="badge bg-secondary mb-2" style="width: fit-content;">{{ product.category.name }}</span>
                             {% endif %}
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            <p class="card-text text-muted">{{ product.description|slice(0, 50) }}...</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="h4 text-primary">{{ product.price }} DT</span>
+                            <h5 class="card-title fw-bold">{{ product.name }}</h5>
+                            <p class="card-text text-muted small">{{ product.description|slice(0, 80) }}...</p>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="h4 text-primary mb-0">{{ product.price }} DT</span>
                                 <div class="btn-group">
                                     <a href="{{ path('app_product_show', {id: product.id}) }}" class="btn btn-outline-primary btn-sm">Voir</a>
                                     <a href="#" class="btn btn-primary btn-sm">Acheter</a>
