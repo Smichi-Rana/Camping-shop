@@ -397,7 +397,8 @@
                 </div>
                 {% endif %}
 
-                <a href="#" class="btn-checkout">
+                {# AMÉLIORATION : Lien mis à jour vers la page de succès/checkout #}
+                <a href="{{ path('app_cart_checkout') }}" class="btn-checkout">
                     <i class="bi bi-credit-card"></i>
                     Procéder au paiement
                 </a>
@@ -423,5 +424,4 @@
     </div>
     {% endif %}
 </div>
-
 {% endblock %}

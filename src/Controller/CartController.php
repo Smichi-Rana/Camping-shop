@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Repository\CategoryRepository;
 use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -48,11 +47,12 @@ class CartController extends AbstractController
         int $id,
         SessionInterface $session,
         ProductRepository $productRepository
-    ): JsonResponse {
+    ): Response {
         $product = $productRepository->find($id);
         
         if (!$product) {
-            return new JsonResponse(['error' => 'Produit non trouvé'], 404);
+            $this->addFlash('danger', 'Produit non trouvé');
+            return $this->redirectToRoute('app_product_index');
         }
 
         $cart = $session->get('cart', []);
@@ -64,12 +64,9 @@ class CartController extends AbstractController
         }
 
         $session->set('cart', $cart);
+        $this->addFlash('success', 'Produit ajouté au panier !');
 
-        return new JsonResponse([
-            'success' => true,
-            'message' => 'Produit ajouté au panier',
-            'cartCount' => array_sum($cart)
-        ]);
+        return $this->redirectToRoute('app_cart');
     }
 
     #[Route('/remove/{id}', name: 'app_cart_remove')]
@@ -94,25 +91,20 @@ class CartController extends AbstractController
         int $id,
         Request $request,
         SessionInterface $session
-    ): JsonResponse {
-        $quantity = (int) $request->request->get('quantity', 1);
-        
-        if ($quantity < 1) {
-            return new JsonResponse(['error' => 'Quantité invalide'], 400);
-        }
-
+    ): Response {
+        $quantity = (int) $request->request->get('quantity');
         $cart = $session->get('cart', []);
         
         if (isset($cart[$id])) {
-            $cart[$id] = $quantity;
+            if ($quantity > 0) {
+                $cart[$id] = $quantity;
+            } else {
+                unset($cart[$id]);
+            }
         }
 
         $session->set('cart', $cart);
-
-        return new JsonResponse([
-            'success' => true,
-            'message' => 'Panier mis à jour'
-        ]);
+        return $this->redirectToRoute('app_cart');
     }
 
     #[Route('/clear', name: 'app_cart_clear')]
@@ -120,17 +112,24 @@ class CartController extends AbstractController
     {
         $session->remove('cart');
         $this->addFlash('success', 'Panier vidé');
-
         return $this->redirectToRoute('app_cart');
     }
 
-    #[Route('/count', name: 'app_cart_count', methods: ['GET'])]
-    public function count(SessionInterface $session): JsonResponse
+    /* --- NOUVELLE ROUTE : PAIEMENT / CHECKOUT --- */
+    #[Route('/checkout', name: 'app_cart_checkout')]
+    public function checkout(SessionInterface $session): Response
     {
         $cart = $session->get('cart', []);
         
-        return new JsonResponse([
-            'count' => array_sum($cart)
-        ]);
+        if (empty($cart)) {
+            $this->addFlash('warning', 'Votre panier est vide.');
+            return $this->redirectToRoute('app_product_index');
+        }
+
+        // Pour l'instant, on vide le panier après le clic sur paiement 
+        // pour simuler une commande réussie
+        $session->remove('cart');
+        
+        return $this->render('cart/checkout.html.twig');
     }
 }

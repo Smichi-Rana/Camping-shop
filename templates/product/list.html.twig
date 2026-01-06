@@ -36,10 +36,8 @@
             {% for product in products %}
                 <div class="col-md-6 col-lg-4">
                     <div class="card h-100 shadow-sm border-0">
-                        {# PARTIE CORRIGÉE : Utilisation du timestamp pour forcer le rafraîchissement du cache #}
                         <div style="height: 250px; overflow: hidden; background-color: #f8f9fa;" class="d-flex align-items-center justify-content-center">
                             {% if product.image %}
-                                {# On ajoute ?v= suivi d'un nombre aléatoire pour tromper le cache du navigateur #}
                                 <img src="{{ asset('uploads/products/' ~ product.image) }}?v={{ random(1, 1000) }}" 
                                      class="card-img-top h-100 w-100" 
                                      style="object-fit: cover;"
@@ -61,9 +59,15 @@
                             
                             <div class="d-flex justify-content-between align-items-center mt-auto">
                                 <span class="h4 text-primary mb-0">{{ product.price }} DT</span>
-                                <div class="btn-group">
+                                <div class="d-flex gap-2">
                                     <a href="{{ path('app_product_show', {id: product.id}) }}" class="btn btn-outline-primary btn-sm">Voir</a>
-                                    <a href="#" class="btn btn-primary btn-sm">Acheter</a>
+                                    
+                                    {# AMÉLIORATION : Formulaire POST pour l'ajout au panier #}
+                                    <form action="{{ path('app_cart_add', {id: product.id}) }}" method="POST" class="d-inline">
+                                        <button type="submit" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-cart-plus"></i> Acheter
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
