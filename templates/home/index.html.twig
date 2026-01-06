@@ -1,0 +1,268 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}CampingShop - {{ totalProducts }} produits{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .hero-section {
+            background: white;
+            border-radius: 30px;
+            padding: 3rem 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid;
+            border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .rating-stars {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .star {
+            color: #fbbf24;
+            font-size: 1rem;
+        }
+
+        .rating-badge {
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 8px;
+        }
+
+        .product-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+
+        .product-title:hover {
+            color: #667eea;
+        }
+
+        .product-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+
+        .product-price {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a202c;
+        }
+
+        .add-to-cart-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            cursor: pointer;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .pagination {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .page-link {
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            color: #667eea;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .page-link:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .page-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .page-link.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-link.disabled:hover {
+            background: white;
+            color: #667eea;
+            transform: none;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero-section">
+            {% if searchTerm %}
+                <h1 class="text-center mb-3" style="font-size: 2rem; font-weight: 800; color: #1a202c;">
+                    🔍 Résultats pour "{{ searchTerm }}"
+                </h1>
+                <p class="text-center lead mb-4" style="color: #718096; font-size: 1.1rem;">
+                    {{ totalProducts }} produit{{ totalProducts > 1 ? 's' : '' }} trouvé{{ totalProducts > 1 ? 's' : '' }}
+                </p>
+                <div class="text-center">
+                    <a href="{{ path('app_home') }}" class="btn btn-sm" style="background: rgba(102, 126, 234, 0.1); color: #667eea; padding: 0.75rem 2rem; border-radius: 50px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <i class="bi bi-x-circle"></i> Effacer la recherche
+                    </a>
+                </div>
+            {% else %}
+                <h1 class="text-center mb-3" style="font-size: 2.5rem; font-weight: 800; color: #1a202c;">
+                    🏕️ Bienvenue sur CampingShop
+                </h1>
+                <p class="text-center lead mb-4" style="color: #718096; font-size: 1.2rem;">
+                    Découvrez notre collection de {{ totalProducts }} produits pour vos aventures en plein air
+                </p>
+                <div class="text-center">
+                    <a href="{{ path('cart_index') }}" class="btn btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 3rem; border-radius: 50px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.75rem;">
+                        <i class="bi bi-cart3"></i> Voir mon panier
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Products Grid -->
+        {% if products|length > 0 %}
+            <div class="row g-4">
+                {% for product in products %}
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="product-card">
+                            <a href="{{ path('product_show', {id: product.id}) }}">
+                                <img src="{{ product.image }}" alt="{{ product.name }}" class="product-image">
+                            </a>
+
+                            <div class="rating-stars">
+                                {% for i in 1..5 %}
+                                    <i class="bi bi-star-fill star"></i>
+                                {% endfor %}
+                                <span class="rating-badge">{{ product.rating }} / 5</span>
+                            </div>
+
+                            <a href="{{ path('product_show', {id: product.id}) }}" style="text-decoration: none;">
+                                <h5 class="product-title">{{ product.name }}</h5>
+                            </a>
+
+                            <div class="product-footer">
+                                <span class="product-price">{{ product.price }}€</span>
+                                <button type="button" class="add-to-cart-btn">
+                                    <i class="bi bi-cart-plus"></i>
+                                    Ajouter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div style="font-size: 5rem; margin-bottom: 2rem;">😕</div>
+                <h3 style="color: #1a202c; font-weight: 700; margin-bottom: 1rem;">Aucun produit trouvé</h3>
+                <p style="color: #718096; font-size: 1.1rem; margin-bottom: 2rem;">
+                    Désolé, nous n'avons trouvé aucun produit correspondant à "{{ searchTerm }}"
+                </p>
+                <a href="{{ path('app_home') }}" class="btn btn-lg" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1rem 2.5rem; border-radius: 50px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.75rem;">
+                    <i class="bi bi-arrow-left"></i> Voir tous les produits
+                </a>
+            </div>
+        {% endif %}
+
+        <!-- Pagination -->
+        {% if totalPages > 1 %}
+            <nav class="pagination">
+                {% if currentPage > 1 %}
+                    <a href="{{ path('app_home', {page: currentPage - 1, search: searchTerm}) }}" class="page-link">
+                        <i class="bi bi-chevron-left"></i> Précédent
+                    </a>
+                {% else %}
+                    <span class="page-link disabled">
+                        <i class="bi bi-chevron-left"></i> Précédent
+                    </span>
+                {% endif %}
+
+                {% for page in 1..totalPages %}
+                    {% if page == currentPage %}
+                        <span class="page-link active">{{ page }}</span>
+                    {% elseif page >= currentPage - 2 and page <= currentPage + 2 %}
+                        <a href="{{ path('app_home', {page: page, search: searchTerm}) }}" class="page-link">{{ page }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if currentPage < totalPages %}
+                    <a href="{{ path('app_home', {page: currentPage + 1, search: searchTerm}) }}" class="page-link">
+                        Suivant <i class="bi bi-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <span class="page-link disabled">
+                        Suivant <i class="bi bi-chevron-right"></i>
+                    </span>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </div>
+{% endblock %}

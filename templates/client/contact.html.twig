@@ -1,0 +1,421 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Contactez-nous - CampingShop{% endblock %}
+
+{% block body %}
+    <style>
+        .contact-container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 2rem;
+        }
+
+        .contact-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .contact-header h1 {
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1rem;
+        }
+
+        .contact-header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .contact-form-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .required-mark {
+            color: #dc3545;
+            margin-left: 3px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .contact-info-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            animation: slideUp 0.8s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .info-section {
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-icon {
+            font-size: 1.5rem;
+        }
+
+        .info-content {
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .info-content a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity 0.3s;
+        }
+
+        .info-content a:hover {
+            opacity: 0.7;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .map-container {
+            margin-top: 2rem;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+        }
+
+        .faq-section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .faq-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .faq-item {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .faq-answer {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+
+    <div class="contact-container">
+        <div class="contact-header">
+            <h1>📞 Contactez-nous</h1>
+            <p>Une question ? Une suggestion ? N'hésitez pas à nous contacter !</p>
+        </div>
+
+        <div class="contact-grid">
+            {# Formulaire de contact #}
+            <div class="contact-form-card">
+                <h2 class="form-title">📧 Envoyez-nous un message</h2>
+
+                {{ form_start(form) }}
+                <div class="form-group">
+                    {{ form_label(form.nom, 'Nom') }}
+                    <span class="required-mark">*</span>
+                    {{ form_widget(form.nom, {'attr': {'placeholder': 'Votre nom', 'class': ''}}) }}
+                    {{ form_errors(form.nom) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.prenom, 'Prénom') }}
+                    <span class="required-mark">*</span>
+                    {{ form_widget(form.prenom, {'attr': {'placeholder': 'Votre prénom', 'class': ''}}) }}
+                    {{ form_errors(form.prenom) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.email, 'Email') }}
+                    <span class="required-mark">*</span>
+                    {{ form_widget(form.email, {'attr': {'placeholder': 'votre.email@example.com', 'class': ''}}) }}
+                    {{ form_errors(form.email) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.telephone, 'Téléphone') }}
+                    {{ form_widget(form.telephone, {'attr': {'placeholder': '+216 XX XXX XXX', 'class': ''}}) }}
+                    {{ form_errors(form.telephone) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.sujet, 'Sujet') }}
+                    <span class="required-mark">*</span>
+                    {{ form_widget(form.sujet, {'attr': {'placeholder': 'Objet de votre message', 'class': ''}}) }}
+                    {{ form_errors(form.sujet) }}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.message, 'Message') }}
+                    <span class="required-mark">*</span>
+                    {{ form_widget(form.message, {'attr': {'placeholder': 'Décrivez votre demande en détail...', 'class': ''}}) }}
+                    {{ form_errors(form.message) }}
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    📤 Envoyer le message
+                </button>
+                {{ form_end(form) }}
+            </div>
+
+            {# Informations de contact #}
+            <div>
+                <div class="contact-info-card">
+                    <div class="info-section">
+                        <div class="info-title">
+                            <span class="info-icon">📍</span>
+                            Adresse
+                        </div>
+                        <div class="info-content">
+                            CampingShop<br>
+                            Avenue Habib Bourguiba<br>
+                            1000 Tunis, Tunisie
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-title">
+                            <span class="info-icon">📧</span>
+                            Email
+                        </div>
+                        <div class="info-content">
+                            <a href="mailto:contact@campingshop.tn">contact@campingshop.tn</a><br>
+                            <a href="mailto:support@campingshop.tn">support@campingshop.tn</a>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-title">
+                            <span class="info-icon">📞</span>
+                            Téléphone
+                        </div>
+                        <div class="info-content">
+                            <a href="tel:+21671123456">+216 71 123 456</a><br>
+                            <a href="tel:+21698765432">+216 98 765 432</a>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-title">
+                            <span class="info-icon">🕒</span>
+                            Horaires d'ouverture
+                        </div>
+                        <div class="info-content">
+                            Lundi - Vendredi : 9h00 - 18h00<br>
+                            Samedi : 9h00 - 13h00<br>
+                            Dimanche : Fermé
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <div class="info-title">
+                            <span class="info-icon">🌐</span>
+                            Réseaux sociaux
+                        </div>
+                        <div class="social-links">
+                            <a href="#" class="social-link" title="Facebook">
+                                <i class="bi bi-facebook"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Instagram">
+                                <i class="bi bi-instagram"></i>
+                            </a>
+                            <a href="#" class="social-link" title="Twitter">
+                                <i class="bi bi-twitter-x"></i>
+                            </a>
+                            <a href="#" class="social-link" title="LinkedIn">
+                                <i class="bi bi-linkedin"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {# Carte (placeholder) #}
+                <div class="map-container">
+                    <div class="map-placeholder">
+                        📍 Carte
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# FAQ Section #}
+        <div class="faq-section">
+            <h2 class="faq-title">❓ Questions fréquentes</h2>
+
+            <div class="faq-item">
+                <div class="faq-question">💳 Quels sont les modes de paiement acceptés ?</div>
+                <div class="faq-answer">Nous acceptons les cartes bancaires, PayPal, virements bancaires et paiement à la livraison.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">🚚 Quels sont les délais de livraison ?</div>
+                <div class="faq-answer">Livraison sous 3-5 jours ouvrés pour la Tunisie. Livraison gratuite pour toute commande.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">↩️ Puis-je retourner un produit ?</div>
+                <div class="faq-answer">Oui, vous disposez de 14 jours pour retourner un produit non utilisé dans son emballage d'origine.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">🔒 Mes données sont-elles sécurisées ?</div>
+                <div class="faq-answer">Absolument ! Toutes vos données sont chiffrées et nous respectons la confidentialité de vos informations.</div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

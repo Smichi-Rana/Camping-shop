@@ -1,0 +1,351 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes réclamations - CampingShop{% endblock %}
+
+{% block body %}
+    <style>
+        .reclamations-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            color: white;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-new {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .reclamations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .reclamation-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .reclamation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .reclamation-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .reclamation-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-en_attente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-en_cours {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-resolue {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejetee {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .reclamation-body {
+            padding: 1.5rem;
+        }
+
+        .reclamation-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .reclamation-meta {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .reclamation-description {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .reclamation-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            background: white;
+            padding: 4rem 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+
+    <div class="reclamations-container">
+        <div class="page-header">
+            <h1>{% if is_granted('ROLE_ADMIN') %}📋 Toutes les réclamations{% else %}📝 Mes Réclamations{% endif %}</h1>
+            {% if not is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_reclamation_new') }}" class="btn-new">
+                    ➕ Nouvelle réclamation
+                </a>
+            {% endif %}
+        </div>
+
+        {% if reclamations|length > 0 %}
+            {# Statistiques #}
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value">{{ reclamations|length }}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value">{{ reclamations|filter(r => r.statut == 'en_attente')|length }}</div>
+                    <div class="stat-label">En attente</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🔄</div>
+                    <div class="stat-value">{{ reclamations|filter(r => r.statut == 'en_cours')|length }}</div>
+                    <div class="stat-label">En cours</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">{{ reclamations|filter(r => r.statut == 'resolue')|length }}</div>
+                    <div class="stat-label">Résolues</div>
+                </div>
+            </div>
+
+            {# Liste des réclamations #}
+            <div class="reclamations-list">
+                {% for reclamation in reclamations %}
+                    <div class="reclamation-card">
+                        <div class="reclamation-header">
+                            <div class="reclamation-id">
+                                🆔 Réclamation #{{ reclamation.id }}
+                            </div>
+                            <span class="status-badge status-{{ reclamation.statut }}">
+                        {% if reclamation.statut == 'en_attente' %}⏳ En attente{% endif %}
+                                {% if reclamation.statut == 'en_cours' %}🔄 En cours{% endif %}
+                                {% if reclamation.statut == 'resolue' %}✅ Résolue{% endif %}
+                                {% if reclamation.statut == 'rejetee' %}❌ Rejetée{% endif %}
+                    </span>
+                        </div>
+
+                        <div class="reclamation-body">
+                            <h3 class="reclamation-title">{{ reclamation.titre }}</h3>
+
+                            <div class="reclamation-meta">
+                                <div class="meta-item">
+                                    <span>📁</span>
+                                    <span>{{ reclamation.categorie|replace({'_': ' '})|title }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <span>📅</span>
+                                    <span>{{ reclamation.dateCreation|date('d/m/Y à H:i') }}</span>
+                                </div>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <div class="meta-item">
+                                        <span>👤</span>
+                                        <span>{{ reclamation.nomUtilisateur }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <p class="reclamation-description">
+                                {{ reclamation.description|length > 200 ? reclamation.description|slice(0, 200) ~ '...' : reclamation.description }}
+                            </p>
+
+                            <div class="reclamation-footer">
+                                <div>
+                                    {% if reclamation.dateTraitement %}
+                                        <small style="color: #28a745;">
+                                            ✅ Traitée le {{ reclamation.dateTraitement|date('d/m/Y') }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="{{ path('app_reclamation_show', {id: reclamation.id}) }}" class="btn-view">
+                                        👁️ Voir détails
+                                    </a>
+
+                                    {% if is_granted('ROLE_ADMIN') and reclamation.statut == 'en_attente' %}
+                                        <a href="{{ path('app_reclamation_traiter_page', {id: reclamation.id}) }}" class="btn-view" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">
+                                            ✍️ Traiter
+                                        </a>
+                                    {% endif %}
+
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <form method="post" action="{{ path('app_reclamation_delete', {id: reclamation.id}) }}" style="display: inline;" onsubmit="return confirm('Supprimer cette réclamation ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                                            <button type="submit" class="btn-delete">🗑️</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📝</div>
+                <h2>Aucune réclamation</h2>
+                <p>{% if is_granted('ROLE_ADMIN') %}Aucune réclamation n'a été soumise pour le moment.{% else %}Vous n'avez pas encore soumis de réclamation.{% endif %}</p>
+                {% if not is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('app_reclamation_new') }}" class="btn-new" style="margin-top: 1rem;">
+                        ➕ Créer une réclamation
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

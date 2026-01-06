@@ -1,0 +1,413 @@
+{# templates/reclamation/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Réclamation #{{ reclamation.id }} - CampingShop{% endblock %}
+
+{% block body %}
+    <style>
+        .detail-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .btn-back {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .detail-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .detail-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+        }
+
+        .detail-header h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            opacity: 0.95;
+        }
+
+        .status-badge {
+            padding: 0.6rem 1.2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-en_attente { background: #fff3cd; color: #856404; }
+        .status-en_cours { background: #cce5ff; color: #004085; }
+        .status-resolue { background: #d4edda; color: #155724; }
+        .status-rejetee { background: #f8d7da; color: #721c24; }
+
+        .detail-body {
+            padding: 2rem;
+        }
+
+        .info-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-box {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .description-box {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            line-height: 1.8;
+            color: #555;
+        }
+
+        .response-box {
+            background: #e7f3ff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .response-box h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .detail-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+
+    <div class="detail-container">
+        <a href="{{ path('app_reclamation_index') }}" class="btn-back">
+            ← Retour à la liste
+        </a>
+
+        <div class="detail-card">
+            <div class="detail-header">
+                <h1>🆔 Réclamation #{{ reclamation.id }}</h1>
+                <div class="header-meta">
+                <span class="status-badge status-{{ reclamation.statut }}">
+                    {% if reclamation.statut == 'en_attente' %}⏳ En attente{% endif %}
+                    {% if reclamation.statut == 'en_cours' %}🔄 En cours{% endif %}
+                    {% if reclamation.statut == 'resolue' %}✅ Résolue{% endif %}
+                    {% if reclamation.statut == 'rejetee' %}❌ Rejetée{% endif %}
+                </span>
+                </div>
+            </div>
+
+            <div class="detail-body">
+                <div class="info-section">
+                    <h2 class="section-title">📋 Informations générales</h2>
+                    <div class="info-grid">
+                        <div class="info-box">
+                            <div class="info-label">📅 Date de création</div>
+                            <div class="info-value">{{ reclamation.dateCreation|date('d/m/Y à H:i') }}</div>
+                        </div>
+
+                        <div class="info-box">
+                            <div class="info-label">📁 Catégorie</div>
+                            <div class="info-value">{{ reclamation.categorie|replace({'_': ' '})|title }}</div>
+                        </div>
+
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <div class="info-box">
+                                <div class="info-label">👤 Client</div>
+                                <div class="info-value">{{ reclamation.nomUtilisateur }}</div>
+                            </div>
+
+                            <div class="info-box">
+                                <div class="info-label">📧 Email</div>
+                                <div class="info-value" style="font-size: 0.95rem;">{{ reclamation.emailUtilisateur }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if reclamation.dateTraitement %}
+                            <div class="info-box">
+                                <div class="info-label">✅ Date de traitement</div>
+                                <div class="info-value">{{ reclamation.dateTraitement|date('d/m/Y à H:i') }}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h2 class="section-title">📝 Titre</h2>
+                    <h3 style="color: #333; font-size: 1.5rem;">{{ reclamation.titre }}</h3>
+                </div>
+
+                <div class="info-section">
+                    <h2 class="section-title">📄 Description</h2>
+                    <div class="description-box">
+                        {{ reclamation.description|nl2br }}
+                    </div>
+                </div>
+
+                {% if reclamation.reponse %}
+                    <div class="info-section">
+                        <div class="response-box">
+                            <h3>💬 Réponse de l'équipe CampingShop</h3>
+                            <p style="color: #555; line-height: 1.8; margin: 0;">{{ reclamation.reponse|nl2br }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if is_granted('ROLE_ADMIN') and reclamation.statut == 'en_attente' %}
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <a href="{{ path('app_reclamation_traiter_page', {id: reclamation.id}) }}"
+                           style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 1rem 3rem; border-radius: 50px; text-decoration: none; font-weight: 600; display: inline-block;">
+                            ✍️ Traiter cette réclamation
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+
+{# ========================================= #}
+{# templates/reclamation/traiter.html.twig #}
+{# ========================================= #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Traiter la réclamation #{{ reclamation.id }} - CampingShop{% endblock %}
+
+{% block body %}
+    <style>
+        .traiter-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+
+        .btn-back {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            transition: all 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .btn-back:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .traiter-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .traiter-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .traiter-header h1 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .traiter-body {
+            padding: 2rem;
+        }
+
+        .reclamation-summary {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .summary-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-text {
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 200px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.4);
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            color: #856404;
+        }
+    </style>
+
+    <div class="traiter-container">
+        <a href="{{ path('app_reclamation_show', {id: reclamation.id}) }}" class="btn-back">
+            ← Retour aux détails
+        </a>
+
+        <div class="traiter-card">
+            <div class="traiter-header">
+                <h1>✍️ Traiter la réclamation #{{ reclamation.id }}</h1>
+            </div>
+
+            <div class="traiter-body">
+                <div class="info-box">
+                    ⚠️ Une fois traitée, la réclamation ne pourra plus être modifiée et le client recevra un email de notification.
+                </div>
+
+                <div class="reclamation-summary">
+                    <div class="summary-title">📋 Titre de la réclamation :</div>
+                    <div class="summary-text"><strong>{{ reclamation.titre }}</strong></div>
+                </div>
+
+                <div class="reclamation-summary">
+                    <div class="summary-title">📄 Description :</div>
+                    <div class="summary-text">{{ reclamation.description }}</div>
+                </div>
+
+                <div class="reclamation-summary">
+                    <div class="summary-title">👤 Client :</div>
+                    <div class="summary-text">{{ reclamation.nomUtilisateur }} ({{ reclamation.emailUtilisateur }})</div>
+                </div>
+
+                <form method="post">
+                    <div class="form-group">
+                        <label for="reponse">💬 Votre réponse au client *</label>
+                        <textarea
+                            id="reponse"
+                            name="reponse"
+                            class="form-control"
+                            placeholder="Rédigez une réponse claire et professionnelle au client..."
+                            required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        ✅ Envoyer la réponse et clôturer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

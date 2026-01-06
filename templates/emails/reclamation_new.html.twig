@@ -1,0 +1,15 @@
+<h2>Nouvelle réclamation (#{{ reclamation.id }})</h2>
+
+<p><strong>Utilisateur :</strong> {{ reclamation.user.email }}</p>
+<p><strong>Message :</strong> {{ reclamation.message }}</p>
+
+<p>
+    <strong>Commande :</strong>
+    {{ reclamation.commande ? reclamation.commande.id : 'Aucune' }}
+</p>
+
+<p>
+    <a href="{{ url('app_reclamation_show', {id: reclamation.id}) }}">
+        Voir la réclamation
+    </a>
+</p>
