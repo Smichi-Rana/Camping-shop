@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Facture;
-use App\Entity\Commande;
 use App\Form\FactureType;
 use App\Repository\FactureRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,51 +13,31 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/facture')]
+#[IsGranted('ROLE_USER')] // Tout utilisateur connecté peut accéder
 class FactureController extends AbstractController
 {
-    // Liste pour ADMIN
     #[Route('/', name: 'app_facture_index', methods: ['GET'])]
-    #[IsGranted('ROLE_ADMIN')]
     public function index(FactureRepository $factureRepository): Response
     {
-        return $this->render('facture/index.html.twig', [
-            'factures' => $factureRepository->findAll(),
-        ]);
-    }
-
-    // Mes factures pour CLIENT
-    #[Route('/mes-factures', name: 'app_mes_factures', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
-    public function mesFactures(FactureRepository $factureRepository): Response
-    {
-        $user = $this->getUser();
-
-        return $this->render('facture/mes_factures.html.twig', [
-            'factures' => $factureRepository->findBy(['user' => $user], ['dateFacture' => 'DESC']),
-        ]);
-    }
-
-    // Créer une facture depuis une commande (ADMIN)
-    #[Route('/generer/{commandeId}', name: 'app_facture_generer', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ADMIN')]
-    public function generer(int $commandeId, EntityManagerInterface $entityManager, Request $request): Response
-    {
-        $commande = $entityManager->getRepository(Commande::class)->find($commandeId);
-
-        if (!$commande) {
-            throw $this->createNotFoundException('Commande non trouvée');
+        // Si admin, voir toutes les factures
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $factures = $factureRepository->findAll();
+        } else {
+            // Si client, voir seulement SES factures
+            $user = $this->getUser();
+            $factures = $factureRepository->findBy(['user' => $user], ['date' => 'DESC']);
         }
 
-        // Créer la facture automatiquement
-        $facture = new Facture();
-        $facture->setCommande($commande);
-        $facture->setUser($commande->getUser());
-        $facture->setTotal($commande->getMontantTotal());
-        $facture->setDateFacture(new \DateTime());
-        $facture->setDateEcheance((new \DateTime())->modify('+30 days'));
-        $facture->setStatut('en attente');
-        $facture->setNumCommande('FAC-' . date('Y') . '-' . str_pad($commandeId, 6, '0', STR_PAD_LEFT));
+        return $this->render('facture/index.html.twig', [
+            'factures' => $factures,
+        ]);
+    }
 
+    #[Route('/new', name: 'app_facture_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')] // Seul l'admin peut créer des factures
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $facture = new Facture();
         $form = $this->createForm(FactureType::class, $facture);
         $form->handleRequest($request);
 
@@ -66,8 +45,9 @@ class FactureController extends AbstractController
             $entityManager->persist($facture);
             $entityManager->flush();
 
-            $this->addFlash('success', 'Facture générée avec succès !');
-            return $this->redirectToRoute('app_facture_show', ['id' => $facture->getId()]);
+            $this->addFlash('success', 'La facture a été créée avec succès.');
+
+            return $this->redirectToRoute('app_facture_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('facture/new.html.twig', [
@@ -76,15 +56,12 @@ class FactureController extends AbstractController
         ]);
     }
 
-    // Voir détails facture
     #[Route('/{id}', name: 'app_facture_show', methods: ['GET'])]
-    #[IsGranted('ROLE_USER')]
     public function show(Facture $facture): Response
     {
         // Vérifier que l'utilisateur peut voir cette facture
-        $user = $this->getUser();
-        if (!$this->isGranted('ROLE_ADMIN') && $facture->getUser() !== $user) {
-            throw $this->createAccessDeniedException('Vous ne pouvez pas accéder à cette facture.');
+        if (!$this->isGranted('ROLE_ADMIN') && $facture->getUser() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
         }
 
         return $this->render('facture/show.html.twig', [
@@ -92,15 +69,38 @@ class FactureController extends AbstractController
         ]);
     }
 
-    // Marquer comme payée (ADMIN)
-    #[Route('/{id}/payer', name: 'app_facture_payer', methods: ['POST'])]
+    #[Route('/{id}/edit', name: 'app_facture_edit', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function payer(Facture $facture, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Facture $facture, EntityManagerInterface $entityManager): Response
     {
-        $facture->setStatut('payée');
-        $entityManager->flush();
+        $form = $this->createForm(FactureType::class, $facture);
+        $form->handleRequest($request);
 
-        $this->addFlash('success', 'Facture marquée comme payée !');
-        return $this->redirectToRoute('app_facture_index');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La facture a été modifiée avec succès.');
+
+            return $this->redirectToRoute('app_facture_index', [], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->render('facture/edit.html.twig', [
+            'facture' => $facture,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_facture_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function delete(Request $request, Facture $facture, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$facture->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($facture);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'La facture a été supprimée avec succès.');
+        }
+
+        return $this->redirectToRoute('app_facture_index', [], Response::HTTP_SEE_OTHER);
     }
 }

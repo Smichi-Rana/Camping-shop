@@ -31,7 +31,7 @@ class StatistiquesController extends AbstractController
                 'factures_en_attente' => count(array_filter($factures, fn($f) => $f->getStatut() === 'en attente')),
             ];
 
-            return $this->render('statistiques/client.html.twig', [
+            return $this->render('statistiques/user.html.twig', [
                 'stats' => $stats,
             ]);
         }

@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Commandes{% endblock %}
+
+{% block body %}
+    <div class="container py-5">
+        <div class="content-card" style="background: white; border-radius: 20px; padding: 2rem; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);">
+            <h1 class="mb-4">
+                <i class="bi bi-cart3"></i> Mes Commandes
+            </h1>
+
+            {% if commandes is empty %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    Vous n'avez pas encore de commandes.
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>N° Commande</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                            <th>Montant Total</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for commande in commandes %}
+                            <tr>
+                                <td><strong>#{{ commande.id }}</strong></td>
+                                <td>{{ commande.dateCommande|date('d/m/Y') }}</td>
+                                <td>
+                                    <span class="badge
+                                        {% if commande.status == 'en_attente' %}bg-warning
+                                        {% elseif commande.status == 'validee' %}bg-success
+                                        {% elseif commande.status == 'livree' %}bg-info
+                                        {% else %}bg-secondary
+                                        {% endif %}">
+                                        {{ commande.status }}
+                                    </span>
+                                </td>
+                                <td><strong>{{ commande.montantTotal|number_format(2, ',', ' ') }} €</strong></td>
+                                <td>
+                                    <a href="{{ path('app_commande_show', {'id': commande.id}) }}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i> Voir
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

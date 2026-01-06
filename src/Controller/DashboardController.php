@@ -17,15 +17,15 @@ class DashboardController extends AbstractController
 
         // Rediriger selon le rôle
         if ($this->isGranted('ROLE_ADMIN')) {
-            return $this->redirectToRoute('admin_dashboard');
+            return $this->redirectToRoute('app_admin_dashboard');
         }
 
-        return $this->render('dashboard/client.html.twig', [
+        return $this->render('dashboard/user.html.twig', [  // ← Changé ici
             'user' => $user,
         ]);
     }
 
-    #[Route('/admin/dashboard', name: 'admin_dashboard')]
+    #[Route('/admin/dashboard', name: 'app_admin_dashboard')]
     #[IsGranted('ROLE_ADMIN')]
     public function adminDashboard(): Response
     {

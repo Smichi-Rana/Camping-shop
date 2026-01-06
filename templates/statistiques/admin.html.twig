@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques Admin{% endblock %}
+
+{% block body %}
+    <div class="container-fluid mt-5">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1><i class="fas fa-chart-bar"></i> Statistiques Globales</h1>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistiques principales -->
+        <div class="row mb-5">
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-primary shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                        <h2 class="display-4">{{ stats.total_commandes }}</h2>
+                        <p class="card-text">Commandes Totales</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-warning shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-3x mb-3"></i>
+                        <h2 class="display-4">{{ stats.commandes_en_attente }}</h2>
+                        <p class="card-text">En Attente</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-success shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-3x mb-3"></i>
+                        <h2 class="display-4">{{ stats.commandes_validees }}</h2>
+                        <p class="card-text">Validées</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card text-white bg-info shadow">
+                    <div class="card-body text-center">
+                        <i class="fas fa-euro-sign fa-3x mb-3"></i>
+                        <h2 class="display-5">{{ stats.chiffre_affaires|number_format(2, ',', ' ') }} €</h2>
+                        <p class="card-text">Chiffre d'Affaires</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques factures -->
+        <div class="row">
+            <div class="col-md-12">
+                <h3 class="mb-3"><i class="fas fa-file-invoice-dollar"></i> Statistiques Factures</h3>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card border-success shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">
+                            <i class="fas fa-check-double"></i> Factures Payées
+                        </h5>
+                        <h2 class="display-5">{{ stats.factures_payees }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card border-warning shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">
+                            <i class="fas fa-hourglass-half"></i> Factures En Attente
+                        </h5>
+                        <h2 class="display-5">{{ stats.factures_en_attente }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -29,10 +29,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     // ✨ NOUVELLES PROPRIÉTÉS
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $nom = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $prenom = null;
 
     // 🔗 Relations
