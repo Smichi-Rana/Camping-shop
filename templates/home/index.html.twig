@@ -1,0 +1,112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - CampingShop{% endblock %}
+
+{% block body %}
+
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 100px 0;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: 50px;
+    }
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 20px;
+    }
+</style>
+
+{# --- SECTION HERO --- #}
+<header class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-4">L'aventure commence ici</h1>
+        <p class="lead mb-5">Équipez-vous avec le meilleur matériel de camping pour vos escapades en pleine nature.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{{ path('app_product_index') }}" class="btn btn-light btn-lg rounded-pill px-5 fw-bold text-primary">
+                Boutique
+            </a>
+            <a href="#features" class="btn btn-outline-light btn-lg rounded-pill px-5">
+                En savoir plus
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    {# --- SECTION POINTS FORTS --- #}
+    <section id="features" class="row g-4 py-5">
+        <div class="col-md-4 text-center">
+            <div class="feature-icon"><i class="bi bi-truck"></i></div>
+            <h4 class="fw-bold">Livraison Rapide</h4>
+            <p class="text-muted">Gratuite dès 100 DT d'achat partout en Tunisie.</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+            <h4 class="fw-bold">Qualité Garantie</h4>
+            <p class="text-muted">Produits testés pour résister aux conditions extrêmes.</p>
+        </div>
+        <div class="col-md-4 text-center">
+            <div class="feature-icon"><i class="bi bi-headset"></i></div>
+            <h4 class="fw-bold">Support 24/7</h4>
+            <p class="text-muted">Des experts à votre écoute pour vous conseiller.</p>
+        </div>
+    </section>
+
+    <hr class="my-5 opacity-10">
+
+    {# --- APERÇU PRODUITS --- #}
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h2 class="fw-bold">Nos Meilleures Ventes</h2>
+            <p class="text-muted">Les articles préférés de nos campeurs.</p>
+        </div>
+        <a href="{{ path('app_product_index') }}" class="btn btn-link text-decoration-none fw-bold text-primary">
+            Voir tout le catalogue <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="row g-4">
+        {% for product in products %}
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
+                    <div style="height: 180px; background: #f8f9fa;">
+                        {% if product.image %}
+                            <img src="{{ asset('uploads/products/' ~ product.image) }}" class="w-100 h-100" style="object-fit: cover;" alt="{{ product.name }}">
+                        {% else %}
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">Image indisponible</div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-1">{{ product.name }}</h6>
+                        <p class="text-primary fw-bold mb-3">{{ product.price|number_format(2, ',', ' ') }} DT</p>
+                        
+                        {# Formulaire pour l'ajout au panier via POST (ton CartController) #}
+                        <form action="{{ path('app_cart_add', {'id': product.id}) }}" method="POST">
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill">
+                                <i class="bi bi-cart-plus me-2"></i>Acheter
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<footer class="bg-dark text-white py-5 mt-5">
+    <div class="container text-center">
+        <p class="mb-0">&copy; 2024 CampingShop. Tous droits réservés.</p>
+    </div>
+</footer>
+{% endblock %}

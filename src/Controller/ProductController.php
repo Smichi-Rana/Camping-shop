@@ -86,17 +86,7 @@ class ProductController extends AbstractController
     // FRONT (Routes publiques)
     // =========================
 
-    #[Route('/', name: 'app_home')]
-    public function home(
-        ProductRepository $productRepository,
-        CategoryRepository $categoryRepository
-    ): Response {
-        return $this->render('product/list.html.twig', [
-            'products' => $productRepository->findAll(),
-            'categories' => $categoryRepository->findAll(),
-            'featured' => $productRepository->findBy([], ['id' => 'DESC'], 8),
-        ]);
-    }
+   
 
     #[Route('/products', name: 'app_product_index')]
     public function productIndex(
