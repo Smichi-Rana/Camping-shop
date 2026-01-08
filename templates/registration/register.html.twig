@@ -1,14 +1,20 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Inscription - CampingShop{% endblock %}
+{% block title %}Register{% endblock %}
 
 {% block body %}
+    <div class="container security-form">
+        <div class="login-form">
+            <h1>Register</h1>
+
+            {{ form_errors(registrationForm) }}
 <div class="row justify-content-center mt-5">
     <div class="col-md-6 col-lg-4">
         <div class="card border-0 shadow-lg rounded-4">
             <div class="card-body p-5">
                 <h2 class="text-center fw-bold mb-4">Créer un compte</h2>
 
+            {{ form_start(registrationForm) }}
                 {{ form_start(registrationForm) }}
                     <div class="mb-3">
                         <label class="form-label">Votre Email</label>
@@ -22,12 +28,30 @@
                         <div class="text-danger small">{{ form_errors(registrationForm.plainPassword) }}</div>
                     </div>
 
+            {{ form_widget(registrationForm.email,{'attr':{'class':'form form-control','placeholder':"Email"}}) }}
+            <br>
+            {{ form_widget(registrationForm.first_name,{'attr':{'class':'form form-control','placeholder':"your Name"}})}}
+            <br>
+            {{ form_widget(registrationForm.last_name,{'attr':{'class':'form form-control','placeholder':"Last_name"}})}}
+            <br>
+            {{ form_widget(registrationForm.adresse,{'attr':{'class':'form form-control','placeholder':"Adresse"}})}}
+            <br>
+            {{ form_widget(registrationForm.code_postal,{'attr':{'class':'form form-control','placeholder':"code"}})}}
+            <br>
+            {{ form_widget(registrationForm.phone,{'attr':{'class':'form form-control','placeholder':"Phone"}})}}
+            <br>
+            {{ form_widget(registrationForm.plainPassword, {'attr':{'class':'form form-control','placeholder':"your passw@rd"}})}}
+            {{ form_row(registrationForm.agreeTerms) }}
+            <button type="submit " class="btn-block btn-primary">Register</button>
+            {{ form_end(registrationForm) }}
+        </div>
+    </div>
                     <div class="mb-3 form-check">
                         {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
                         <label class="form-check-label small">J'accepte les conditions d'utilisation</label>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm" 
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm"
                             style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); border: none;">
                         S'inscrire
                     </button>

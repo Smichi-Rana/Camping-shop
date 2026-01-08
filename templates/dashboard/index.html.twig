@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        body {
+            background: url('/images/dashboard-bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .dashboard-container {
+            padding: 40px;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .card {
+            background-color: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: #fff;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="dashboard-container">
+        <h1>Bienvenue sur le Dashboard Admin</h1>
+        <div class="row mt-4">
+            <!-- Paiements -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Paiements</h5>
+                        <p class="card-text">Gérer et consulter tous les paiements des clients.</p>
+                        <a href="{{ path('paiement_list') }}" class="btn btn-primary">Voir Paiements</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Avis -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Avis Clients</h5>
+                        <p class="card-text">Consulter les avis laissés par les clients.</p>
+                        <a href="{{ path('avis_index') }}" class="btn btn-primary">Voir Avis</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Réclamations -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Réclamations</h5>
+                        <p class="card-text">Traiter toutes les réclamations reçues.</p>
+                        <a href="{{ path('app_reclamation_index') }}" class="btn btn-primary">Voir Réclamations</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résumé rapide -->
+        <div class="mt-5">
+            <h3>Résumé rapide</h3>
+            <ul>
+                <li>Total Paiements : {{ paiements|length }}</li>
+                <li>Total Avis : {{ avis|length }}</li>
+                <li>Total Réclamations : {{ reclamations|length }}</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
